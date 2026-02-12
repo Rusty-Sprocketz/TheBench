@@ -1,4 +1,4 @@
-const API_BASE = '/api/pipeline';
+const API = '/api/pipeline';
 
 async function fetchJSON(url, options = {}) {
   const res = await fetch(url, {
@@ -20,50 +20,50 @@ async function fetchJSON(url, options = {}) {
 }
 
 export async function preflight() {
-  return fetchJSON(`${API_BASE}/preflight`, { method: 'POST' });
+  return fetchJSON(`${API}?action=preflight`, { method: 'POST' });
 }
 
 export async function runArchitect(seed) {
-  return fetchJSON(`${API_BASE}/architect`, {
+  return fetchJSON(`${API}?action=architect`, {
     method: 'POST',
     body: JSON.stringify({ seed }),
   });
 }
 
 export async function runBuilder(spec) {
-  return fetchJSON(`${API_BASE}/builder`, {
+  return fetchJSON(`${API}?action=builder`, {
     method: 'POST',
     body: JSON.stringify({ spec }),
   });
 }
 
 export async function runReviewer(spec, files) {
-  return fetchJSON(`${API_BASE}/reviewer`, {
+  return fetchJSON(`${API}?action=reviewer`, {
     method: 'POST',
     body: JSON.stringify({ spec, files }),
   });
 }
 
 export async function runTester(spec, files) {
-  return fetchJSON(`${API_BASE}/tester`, {
+  return fetchJSON(`${API}?action=tester`, {
     method: 'POST',
     body: JSON.stringify({ spec, files }),
   });
 }
 
 export async function runDeployer(projectName, files, spec, buildLog) {
-  return fetchJSON(`${API_BASE}/deployer`, {
+  return fetchJSON(`${API}?action=deployer`, {
     method: 'POST',
     body: JSON.stringify({ projectName, files, spec, buildLog }),
   });
 }
 
 export async function checkUrl(url) {
-  return fetchJSON(`${API_BASE}/check-url?url=${encodeURIComponent(url)}`);
+  return fetchJSON(`${API}?action=check-url&url=${encodeURIComponent(url)}`);
 }
 
 export async function cleanup(projectName) {
-  return fetchJSON(`${API_BASE}/cleanup`, {
+  return fetchJSON(`${API}?action=cleanup`, {
     method: 'POST',
     body: JSON.stringify({ projectName }),
   });

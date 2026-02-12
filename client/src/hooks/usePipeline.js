@@ -201,10 +201,18 @@ export function usePipeline() {
     }
   }, [runStage]);
 
-  const cancel = useCallback(() => {
+  const cancel = useCallback(async () => {
     cancelledRef.current = true;
+    // Tear down the project if it was already created during preflight
+    if (projectName) {
+      try {
+        await api.cleanup(projectName);
+      } catch {
+        // ignore cleanup errors
+      }
+    }
     setPipelineStatus('idle');
-  }, []);
+  }, [projectName]);
 
   const startOver = useCallback(async () => {
     // Cleanup existing deployment if any

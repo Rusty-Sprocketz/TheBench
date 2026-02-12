@@ -39,7 +39,10 @@ The candidate you are interviewing is Russell "Rusty" Downs. Here is their backg
   - Delivered 25+ Future Ways of Working Strategies, Roadmaps & Business Cases
   - Designed GenWizard University Portal (internal Accenture AI initiative)
   - Led Mobility Strategy for a global wine company involving Azure AD App Proxy, virtual assistant bots, and custom app development
-- Cloud & infrastructure: AWS Cloud Practitioner certified, MCSA, MCP; deep experience across Azure and M365 ecosystems
+- Current role at Arinco (post-Accenture):
+  - Delivery & technical lead on PEXA's global Modern Endpoint Management project — designed and delivered a global Intune solution for 2,000 staff across Windows, macOS, iOS (corporate-owned) and iOS/Android (BYO)
+  - Leading a team of four at TAC (Transport Accident Commission) on a tenant migration from shared tenancy with WorkSafe Victoria — migrating domains, users, mailboxes, Teams, SharePoint, OneDrive to a standalone tenant, plus SCCM-to-Intune/Autopilot migration and BYO enablement via Intune MAM
+- Cloud & infrastructure: AWS Cloud Practitioner certified, MCSA, MCP; deep experience across Azure, Intune, and M365 ecosystems
 - Skills: Workplace Strategy, Architecture & Design, Requirements Analysis, Solution Design, Problem Solving
 Use this context to ask informed, specific questions about their experience. Don't just recite their background back to them — probe deeper into the architecture decisions, trade-offs, and design thinking behind their work. Challenge them on how their enterprise architecture experience translates to directing AI agents to build systems.
 

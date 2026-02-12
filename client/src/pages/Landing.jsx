@@ -72,11 +72,14 @@ function Landing() {
               I joined in 2014, and then at Accenture after the acquisition in 2020.
               Across 25+ engagements I led workplace strategy and transformation
               programs specialising in M365, modern workplace, end-user experience,
-              and endpoint management. My job was never just the technology &mdash; it
-              was understanding how people actually work with it, then designing
-              solutions that met them where they were. Self-service SOE delivery
-              platforms, EUX monitoring dashboards with auto-healing &mdash; tools built
-              around the human, not the other way around.
+              and endpoint management. Most recently at Arinco, I led the delivery
+              of a global Intune endpoint management solution for PEXA&rsquo;s 2,000 staff
+              and am currently leading a tenant migration and Intune rollout at TAC.
+              My job has never been just the technology &mdash; it&rsquo;s understanding how
+              people actually work with it, then designing solutions that meet them
+              where they are. Self-service SOE platforms, EUX monitoring dashboards
+              with auto-healing, global device management &mdash; tools built around the
+              human, not the other way around.
             </p>
             <p>
               That background is exactly why AI-agent development makes sense as my

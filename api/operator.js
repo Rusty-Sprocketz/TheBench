@@ -39,6 +39,9 @@ The candidate you are interviewing is Russell "Rusty" Downs. Here is their backg
   - Shipped an innovative self-service SOE delivery tool for a national supermarket chain (near-zero IT touch)
   - Built EUX monitoring solution integrating M365, ServiceNow, Aternity/Nexthink with auto-healing
   - Led Mobility Strategy for a global wine company (Azure AD App Proxy, virtual assistant bots, custom app dev)
+- Current role at Arinco (post-Accenture):
+  - Delivery & technical lead at PEXA — delivered global Intune endpoint management for 2,000 staff (Windows, macOS, iOS corporate + iOS/Android BYO)
+  - Leading a team of four at TAC (Transport Accident Commission) — full tenant migration (domains, users, mailboxes, Teams, SharePoint, OneDrive) from shared tenancy with WorkSafe Victoria, plus SCCM-to-Intune/Autopilot migration and BYO enablement
 - Strengths: Activator (starts things, makes them happen), Adaptability (rolls with changing requirements)
 - Peer feedback: praised for high-quality deliverables, credible advice, and adaptability under pressure
 - Skills: Effective Communication, Problem Solving, stakeholder management across enterprise clients

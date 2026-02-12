@@ -3,6 +3,7 @@ import Nav from './components/Nav'
 import Landing from './pages/Landing'
 import Interview from './pages/Interview'
 import HowItWorks from './pages/HowItWorks'
+import AgentOps from './pages/AgentOps'
 import './App.css'
 
 function App() {
@@ -13,6 +14,7 @@ function App() {
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/interview" element={<Interview />} />
+          <Route path="/agentops" element={<AgentOps />} />
           <Route path="/how-it-works" element={<HowItWorks />} />
         </Routes>
       </main>

@@ -250,6 +250,118 @@
   line-height: 1.6;
 }
 
+/* Override items */
+.override-item {
+  border-left: 3px solid #f59e0b;
+}
+
+.override-label {
+  padding: 4px 10px;
+  border-radius: 6px;
+  background: rgba(245, 158, 11, 0.12);
+  color: #f59e0b;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+  height: fit-content;
+}
+
+/* Risk grid */
+.risk-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 16px;
+}
+
+.risk-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.risk-card h4 {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.risk-card p {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+.risk-level {
+  display: inline-block;
+  padding: 3px 10px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 10px;
+}
+
+.risk-level.high {
+  background: rgba(239, 68, 68, 0.12);
+  color: #ef4444;
+}
+
+.risk-level.medium {
+  background: rgba(245, 158, 11, 0.12);
+  color: #f59e0b;
+}
+
+.risk-level.low {
+  background: rgba(34, 197, 94, 0.12);
+  color: #22c55e;
+}
+
+/* Improvements list */
+.improvements-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.improvement-item {
+  display: flex;
+  gap: 16px;
+  padding: 20px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+}
+
+.improvement-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(139, 92, 246, 0.12);
+  color: var(--accent-purple);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+
+.improvement-item h4 {
+  font-size: 15px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.improvement-item p {
+  font-size: 14px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
 /* Personal note */
 .note-card {
   background: var(--bg-card);
@@ -306,6 +418,20 @@
   }
 
   .decision {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .risk-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .override-item {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .improvement-item {
     flex-direction: column;
     gap: 12px;
   }

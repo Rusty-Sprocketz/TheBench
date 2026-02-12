@@ -8,6 +8,14 @@
   margin-bottom: 100px;
 }
 
+.hero-tagline {
+  font-size: 17px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  font-style: italic;
+  margin-bottom: 28px;
+}
+
 .hero-badge {
   display: inline-block;
   padding: 6px 16px;

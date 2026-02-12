@@ -25,6 +25,12 @@ function Nav() {
             Interview
           </Link>
           <Link
+            to="/agentops"
+            className={`nav-link ${location.pathname === '/agentops' ? 'active' : ''}`}
+          >
+            AgentOps
+          </Link>
+          <Link
             to="/how-it-works"
             className={`nav-link ${location.pathname === '/how-it-works' ? 'active' : ''}`}
           >

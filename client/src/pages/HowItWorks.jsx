@@ -64,7 +64,7 @@ function HowItWorks() {
           </div>
           <div className="stack-item">
             <h4>Deployment</h4>
-            <p>Vercel (frontend) + Railway/Render (backend)</p>
+            <p>Vercel (frontend + serverless API functions)</p>
           </div>
         </div>
       </section>
@@ -84,7 +84,7 @@ function HowItWorks() {
           </div>
           <div className="prompt-content">
             <p><strong>Role:</strong> Senior technical interviewer</p>
-            <p><strong>Focus:</strong> System architecture, cloud infrastructure, AI-agent workflow design, code quality judgment</p>
+            <p><strong>Focus:</strong> Enterprise-to-AI translation &mdash; how architecture experience applies to directing AI agents. System decomposition, quality gates, evaluating AI output. Explicitly avoids deep coding or algorithm questions.</p>
             <p><strong>Style:</strong> Sharp, precise, technical but fair. Asks one focused question at a time and follows up.</p>
             <p><strong>Why Claude:</strong> Best-in-class at reasoning through complex technical problems and assessing architectural thinking.</p>
           </div>
@@ -97,7 +97,7 @@ function HowItWorks() {
           </div>
           <div className="prompt-content">
             <p><strong>Role:</strong> Practical, operations-focused interviewer</p>
-            <p><strong>Focus:</strong> Day-to-day AI agent workflow, shipping cadence, quality control, handling agent mistakes</p>
+            <p><strong>Focus:</strong> Delivery leadership &mdash; managing teams, timelines, and shipping under pressure. Quality through process, practical triage, and how enterprise delivery translates to running AI agents. Avoids IDE workflows and coding patterns.</p>
             <p><strong>Style:</strong> Direct, pragmatic, slightly informal with dry humour. Pushes for specifics.</p>
             <p><strong>Why GPT-4o:</strong> Strong at task-oriented, operational thinking and scenario-based assessment.</p>
           </div>
@@ -171,6 +171,152 @@ function HowItWorks() {
                 running in the terminal. I directed the architecture, reviewed every component,
                 and made correction decisions throughout. The AI wrote the code; I made the calls.
               </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Where I Overrode the Agents */}
+      <section className="hiw-section">
+        <h2>Where I Overrode the Agents</h2>
+        <p className="section-note">
+          Directing agents isn&rsquo;t &ldquo;set and forget.&rdquo; These are the places I had to step in and correct course.
+        </p>
+        <div className="decisions-list">
+          <div className="decision override-item">
+            <div className="override-label">Correction</div>
+            <div>
+              <h4>Agents Asked Coding Questions</h4>
+              <p>
+                The Architect and Operator both defaulted to deep coding and algorithm questions &mdash;
+                inappropriate for a non-coding candidate applying for an AI-agent orchestration role.
+                Rewrote prompts to focus on system thinking, delivery leadership, and directing AI agents.
+              </p>
+            </div>
+          </div>
+          <div className="decision override-item">
+            <div className="override-label">Correction</div>
+            <div>
+              <h4>Interview Length Was Inconsistent</h4>
+              <p>
+                Agents would ask anywhere from 3 to 4+ questions per round, making the experience uneven.
+                Constrained each agent to exactly 3 questions for consistency and respect for the candidate&rsquo;s time.
+              </p>
+            </div>
+          </div>
+          <div className="decision override-item">
+            <div className="override-label">Correction</div>
+            <div>
+              <h4>Verdict Format Was Vague</h4>
+              <p>
+                Without strict structure, agents gave meandering, unparseable conclusions. Enforced a specific
+                verdict format with clear ratings so the frontend could reliably display results.
+              </p>
+            </div>
+          </div>
+          <div className="decision override-item">
+            <div className="override-label">Correction</div>
+            <div>
+              <h4>Claude Code Used Wrong Gemini Model</h4>
+              <p>
+                Claude Code initially referenced a deprecated Gemini model ID. Caught the error in testing
+                and corrected it to <code>gemini-2.0-flash</code> before deployment.
+              </p>
+            </div>
+          </div>
+          <div className="decision override-item">
+            <div className="override-label">Correction</div>
+            <div>
+              <h4>Agents Recited Background Instead of Probing</h4>
+              <p>
+                Agents would spend their questions restating the candidate&rsquo;s background rather than
+                actually testing depth. Added explicit &ldquo;don&rsquo;t recite the candidate&rsquo;s history&rdquo;
+                instructions to each prompt.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Where Hallucination Risk Is High */}
+      <section className="hiw-section">
+        <h2>Where Hallucination Risk Is High</h2>
+        <p className="section-note">
+          Any honest AI project should identify where the models are most likely to produce unreliable output.
+        </p>
+        <div className="risk-grid">
+          <div className="risk-card">
+            <span className="risk-level high">High</span>
+            <h4>Verdict Accuracy</h4>
+            <p>
+              Verdicts are subjective and heavily influenced by how articulately a candidate responds.
+              A confident but shallow answer may score higher than a thoughtful but hesitant one.
+            </p>
+          </div>
+          <div className="risk-card">
+            <span className="risk-level high">High</span>
+            <h4>Background Interpretation</h4>
+            <p>
+              Agents can make incorrect inferences about the depth of a candidate&rsquo;s experience,
+              especially when the background spans multiple domains.
+            </p>
+          </div>
+          <div className="risk-card">
+            <span className="risk-level medium">Medium</span>
+            <h4>Question Quality</h4>
+            <p>
+              Despite constraints, agents can produce repetitive or overlapping questions across rounds,
+              particularly when prompts share similar context.
+            </p>
+          </div>
+          <div className="risk-card">
+            <span className="risk-level low">Low</span>
+            <h4>Technical Infrastructure</h4>
+            <p>
+              The code itself is deterministic and was reviewed before deployment. Infrastructure risks
+              are standard web-app concerns, not AI-specific.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* What I'd Improve With More Time */}
+      <section className="hiw-section">
+        <h2>What I&rsquo;d Improve With More Time</h2>
+        <div className="improvements-list">
+          <div className="improvement-item">
+            <div className="improvement-icon">1</div>
+            <div>
+              <h4>Cross-Agent Memory</h4>
+              <p>Pass context between interview rounds so later agents can build on earlier answers instead of starting cold.</p>
+            </div>
+          </div>
+          <div className="improvement-item">
+            <div className="improvement-icon">2</div>
+            <div>
+              <h4>Streaming Responses</h4>
+              <p>Show text as it&rsquo;s generated rather than waiting for the full response &mdash; dramatically better UX for long answers.</p>
+            </div>
+          </div>
+          <div className="improvement-item">
+            <div className="improvement-icon">3</div>
+            <div>
+              <h4>Prompt Evaluation Framework</h4>
+              <p>Automated A/B testing of prompt variations to measure which phrasing produces the most useful interview questions.</p>
+            </div>
+          </div>
+          <div className="improvement-item">
+            <div className="improvement-icon">4</div>
+            <div>
+              <h4>Agent Observability Dashboard</h4>
+              <p>Track token usage, response times, and error rates per agent &mdash; the kind of monitoring any production AI system needs.</p>
+            </div>
+          </div>
+          <div className="improvement-item">
+            <div className="improvement-icon">5</div>
+            <div>
+              <h4>Mobile-First Interview UX</h4>
+              <p>Redesign the interview flow for mobile screens with better input handling and touch-friendly navigation.</p>
             </div>
           </div>
         </div>

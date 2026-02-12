@@ -5,6 +5,7 @@ function Landing() {
   return (
     <div className="landing">
       <section className="hero">
+        <p className="hero-tagline">You said don&rsquo;t send a CV. So I built this instead.</p>
         <div className="hero-badge">Multi-Agent AI Interview</div>
         <h1 className="hero-title">
           Welcome to <span className="highlight">The Bench</span>

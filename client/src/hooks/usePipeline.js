@@ -1,7 +1,7 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import * as api from '../utils/pipelineApi';
 
-const STAGES = ['preflight', 'architect', 'builder', 'reviewer', 'tester', 'deployer'];
+const STAGES = ['preflight', 'architect', 'builder', 'reviewer', 'tester', 'fixer', 'deployer'];
 
 const STAGE_LABELS = {
   preflight: 'Preflight',
@@ -9,6 +9,7 @@ const STAGE_LABELS = {
   builder: 'Builder',
   reviewer: 'Reviewer',
   tester: 'Test Agent',
+  fixer: 'Bug Fixer',
   deployer: 'Deploy',
 };
 
@@ -159,9 +160,29 @@ export function usePipeline() {
       );
 
       // Stage 4: Tester
-      const testerResult = await runStage('tester', () =>
+      let testerResult = await runStage('tester', () =>
         api.runTester(architectResult.spec, builderResult.files)
       );
+
+      // Stage 4.5: Fix loop — if tests fail, send back to Builder for fixes, then re-test
+      let fixerResult = null;
+      if (testerResult.tests && testerResult.tests.failed > 0) {
+        fixerResult = await runStage('fixer', () =>
+          api.runFixer(architectResult.spec, builderResult.files, testerResult.tests)
+        );
+        // Update files with fixed versions
+        builderResult.files = fixerResult.files;
+        pipelineDataRef.current.files = fixerResult.files;
+        setSourceFiles(fixerResult.files);
+
+        // Re-test with fixed files
+        testerResult = await runStage('tester', () =>
+          api.runTester(architectResult.spec, fixerResult.files)
+        );
+      } else {
+        // Skip fixer — mark as not needed
+        updateStage('fixer', { status: 'complete', output: { skipped: true, fixedCount: 0 }, duration: 'skipped' });
+      }
 
       // Stage 5: Deploy
       const buildLog = {
@@ -176,6 +197,7 @@ export function usePipeline() {
         },
         reviewer: reviewerResult.review,
         tester: testerResult.tests,
+        fixer: fixerResult ? { fixNotes: fixerResult.fixNotes, fixedCount: fixerResult.fixedCount } : { skipped: true },
         deployer: {
           projectName: preflightResult.projectName,
           deployedAt: new Date().toISOString(),

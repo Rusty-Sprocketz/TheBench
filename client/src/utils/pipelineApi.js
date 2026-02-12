@@ -51,6 +51,13 @@ export async function runTester(spec, files) {
   });
 }
 
+export async function runFixer(spec, files, testResults) {
+  return fetchJSON(`${API}?action=fixer`, {
+    method: 'POST',
+    body: JSON.stringify({ spec, files, testResults }),
+  });
+}
+
 export async function runDeployer(projectName, files, spec, buildLog) {
   return fetchJSON(`${API}?action=deployer`, {
     method: 'POST',

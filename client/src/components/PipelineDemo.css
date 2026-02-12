@@ -56,6 +56,24 @@
   color: #22c55e;
 }
 
+.pipeline-demo__check-btn {
+  padding: 2px 10px;
+  font-size: 11px;
+  font-weight: 600;
+  font-family: 'JetBrains Mono', monospace;
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.pipeline-demo__check-btn:hover {
+  color: var(--text-secondary);
+  border-color: var(--text-muted);
+}
+
 /* Stages container */
 .pipeline-demo__stages {
   position: relative;

@@ -286,7 +286,7 @@ Produce your review JSON.` },
 
 // ─── Tester ───
 
-const TESTER_SYSTEM = `You are the Test Agent in a live AI pipeline demo. You generate and evaluate structural test assertions for code built by the Builder.
+const TESTER_SYSTEM = `You are the Test Agent in a live AI pipeline demo. You must rigorously test code built by the Builder by analyzing the actual source code for bugs and issues.
 
 You MUST respond with ONLY valid JSON — no markdown, no explanation, no code fences. Just the raw JSON object.
 
@@ -298,7 +298,7 @@ The JSON must follow this exact schema:
   "tests": [
     {
       "name": "string — test name",
-      "category": "structure" | "api" | "security" | "accessibility" | "theme",
+      "category": "structure" | "api" | "security" | "accessibility" | "theme" | "logic",
       "status": "pass" | "fail",
       "detail": "string — what was checked and result"
     }
@@ -306,15 +306,31 @@ The JSON must follow this exact schema:
   "testerNotes": "string — 2-3 sentences about test coverage and findings"
 }
 
-Generate tests covering:
-1. STRUCTURE: Required DOM elements exist (input, button, output area, build-log-panel)
-2. API: Serverless function handles POST, returns expected response shape, handles errors
-3. SECURITY: No exposed API keys in frontend code, input sanitization present
-4. ACCESSIBILITY: Form labels exist, semantic HTML used, button has text
-5. THEME: CSS custom properties defined matching the spec palette
-6. ROUTING: vercel.json has correct rewrites for API and SPA
+CRITICAL: You must CAREFULLY trace through the code logic to find real bugs. Common issues to catch:
 
-Evaluate each test by analyzing the actual code content. Be honest about pass/fail.`;
+LOGIC TESTS (most important):
+1. Does app.js correctly call the API endpoint? Check the fetch URL matches what api/generate.js expects
+2. Does app.js correctly parse the API response? Check that response field names in the frontend match what the backend actually returns
+3. Does api/generate.js return valid JSON with the correct field names matching the spec's responseBody?
+4. Does app.js correctly display the result? Trace from API response → DOM update. Check for mismatched property names
+5. For AI-powered apps: Does api/generate.js correctly initialize and call the Gemini API? Check model name, API key usage, prompt construction, and response extraction
+6. For computation apps: Does the computation logic actually work? Trace through the algorithm with a sample input
+7. Does error handling in both frontend and backend work? Will caught errors display properly?
+8. Are there any syntax errors in the JS code? Check for unclosed brackets, missing semicolons in critical spots, typos in variable names
+
+STRUCTURAL TESTS:
+9. Required DOM elements: input field, submit button, output area, build-log-panel
+10. CSS custom properties defined matching the spec palette
+
+API TESTS:
+11. Serverless function exports correctly (module.exports = async (req, res) => {...})
+12. Function handles the correct HTTP method
+13. Function returns JSON via res.json() or res.status().json()
+
+ROUTING:
+14. vercel.json has correct rewrites for API and SPA
+
+For each FAIL, describe the exact bug: which file, which line/section, what's wrong, and what it should be instead. Be specific enough that a developer could fix it from your description alone.`;
 
 async function handleTester(req, res) {
   if (!process.env.GEMINI_API_KEY) return res.status(500).json({ error: 'Gemini API key not configured' });
@@ -342,6 +358,61 @@ Generate your test results JSON.` }] }],
   tests.passed = tests.tests.filter(t => t.status === 'pass').length;
   tests.failed = tests.tests.filter(t => t.status === 'fail').length;
   res.json({ stage: 'tester', tests });
+}
+
+// ─── Fixer (Builder fix pass) ───
+
+const FIXER_SYSTEM = `You are the Builder Agent doing a FIX PASS. The Tester found bugs in your code. You must fix ONLY the failing tests while keeping everything else intact.
+
+You MUST respond with ONLY valid JSON — no markdown, no explanation, no code fences. Just the raw JSON object.
+
+The JSON must follow this exact schema:
+{
+  "files": {
+    "filename": "string — complete fixed file content"
+  },
+  "fixNotes": "string — what you fixed and why"
+}
+
+RULES:
+1. Only include files that need changes. Unchanged files should NOT be in the output.
+2. When you include a file, include the COMPLETE file content (not a diff).
+3. Fix every failing test the Tester identified. Read their detailed descriptions carefully.
+4. Do NOT change the overall app design, theme, or structure — only fix the bugs.
+5. Pay special attention to: mismatched API field names, incorrect fetch URLs, broken JSON parsing, incorrect Gemini API usage.`;
+
+async function handleFixer(req, res) {
+  if (!process.env.ANTHROPIC_API_KEY) return res.status(500).json({ error: 'Anthropic API key not configured' });
+  const { spec, files, testResults } = req.body;
+  if (!spec || !files || !testResults) return res.status(400).json({ error: 'Missing spec, files, or testResults' });
+
+  const failedTests = testResults.tests.filter(t => t.status === 'fail');
+  if (failedTests.length === 0) return res.json({ stage: 'fixer', files, fixNotes: 'No fixes needed' });
+
+  const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+  const response = await client.messages.create({
+    model: 'claude-sonnet-4-5-20250929', max_tokens: 8192, system: FIXER_SYSTEM,
+    messages: [{ role: 'user', content: `Fix the failing tests in this app.
+
+ARCHITECT SPEC:
+${JSON.stringify(spec, null, 2)}
+
+CURRENT FILES:
+${Object.entries(files).map(([n, c]) => `--- ${n} ---\n${c}`).join('\n\n')}
+
+FAILING TESTS:
+${failedTests.map((t, i) => `${i + 1}. [${t.category}] ${t.name}: ${t.detail}`).join('\n')}
+
+Return ONLY the files that need changes, with their complete fixed content.` }],
+  });
+
+  const result = parseJSON(response.content[0].text, 'Fixer');
+  if (!result.files) throw new Error('Fixer output missing files');
+
+  // Merge fixed files into the full file set
+  const mergedFiles = { ...files, ...result.files };
+
+  res.json({ stage: 'fixer', files: mergedFiles, fixNotes: result.fixNotes || '', fixedCount: Object.keys(result.files).length });
 }
 
 // ─── Deployer ───
@@ -492,6 +563,7 @@ const ACTIONS = {
   builder: handleBuilder,
   reviewer: handleReviewer,
   tester: handleTester,
+  fixer: handleFixer,
   deployer: handleDeployer,
   'check-url': handleCheckUrl,
   cleanup: handleCleanup,

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { usePipeline } from '../hooks/usePipeline'
 import { checkUrl } from '../utils/pipelineApi'
 import PipelineStage from './PipelineStage'
@@ -23,24 +23,18 @@ function PipelineDemo() {
     retryStage,
   } = usePipeline()
 
-  const [urlCheck, setUrlCheck] = useState(null) // { status, ok }
+  const [urlCheck, setUrlCheck] = useState(null) // null | 'checking' | { status, ok }
 
-  // Check target URL status when idle
-  useEffect(() => {
-    if (pipelineStatus !== 'idle' || !targetUrl) return
-
-    let cancelled = false
-    async function check() {
-      try {
-        const result = await checkUrl(targetUrl)
-        if (!cancelled) setUrlCheck(result)
-      } catch {
-        if (!cancelled) setUrlCheck({ status: 0, ok: false })
-      }
+  async function handleCheckUrl() {
+    if (!targetUrl) return
+    setUrlCheck('checking')
+    try {
+      const result = await checkUrl(targetUrl)
+      setUrlCheck(result)
+    } catch {
+      setUrlCheck({ status: 0, ok: false })
     }
-    check()
-    return () => { cancelled = true }
-  }, [pipelineStatus, targetUrl])
+  }
 
   return (
     <div className="pipeline-demo">
@@ -57,10 +51,18 @@ function PipelineDemo() {
         <div className="pipeline-demo__target">
           <span className="pipeline-demo__target-label">Target URL:</span>
           <span className="pipeline-demo__target-url">{targetUrl.replace('https://', '')}</span>
-          {urlCheck && (
+          {urlCheck === 'checking' && (
+            <span className="pipeline-demo__target-status">Checking...</span>
+          )}
+          {urlCheck && urlCheck !== 'checking' && (
             <span className={`pipeline-demo__target-status ${urlCheck.ok ? 'pipeline-demo__target-status--live' : ''}`}>
-              {urlCheck.ok ? `${urlCheck.status} OK ✓` : '404 Not Found ✗'}
+              {urlCheck.ok ? `${urlCheck.status} OK` : '404 Not Found'}
             </span>
+          )}
+          {pipelineStatus === 'running' && urlCheck !== 'checking' && (
+            <button className="pipeline-demo__check-btn" onClick={handleCheckUrl}>
+              Check
+            </button>
           )}
         </div>
       )}

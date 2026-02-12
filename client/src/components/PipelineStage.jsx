@@ -5,6 +5,7 @@ const STAGE_COLORS = {
   builder: '#22c55e',
   reviewer: '#f59e0b',
   tester: 'var(--accent-purple, #8b5cf6)',
+  fixer: '#f97316',
   deployer: '#ef4444',
 }
 
@@ -13,17 +14,19 @@ const STAGE_ICONS = {
   builder: 'Claude',
   reviewer: 'GPT-4o',
   tester: 'Gemini',
+  fixer: 'Claude',
   deployer: 'Vercel',
 }
 
 function getStageSummary(name, stage) {
   if (stage.status === 'running') {
     switch (name) {
-      case 'architect': return 'Designing app spec...'
-      case 'builder': return 'Generating files...'
-      case 'reviewer': return 'Reviewing code...'
-      case 'tester': return 'Running tests...'
-      case 'deployer': return 'Deploying to Vercel...'
+      case 'architect': return 'Designing app spec... (~10s)'
+      case 'builder': return 'Generating files... (~1-2 min)'
+      case 'reviewer': return 'Reviewing code... (~15s)'
+      case 'tester': return 'Running tests... (~15s)'
+      case 'fixer': return 'Fixing failing tests... (~1-2 min)'
+      case 'deployer': return 'Deploying to Vercel... (~30s)'
       default: return 'Working...'
     }
   }
@@ -42,6 +45,9 @@ function getStageSummary(name, stage) {
         const t = stage.output.tests;
         return t ? `${t.passed}/${t.totalTests} tests passed` : 'Tests complete';
       }
+      case 'fixer':
+        if (stage.output.skipped) return 'All tests passed — no fixes needed';
+        return `Fixed ${stage.output.fixedCount || '?'} files`;
       case 'deployer':
         return 'Live!';
       default:
@@ -85,7 +91,7 @@ function PipelineStage({ name, stage, onRetry }) {
             <span className="pipeline-live-stage__status-text">
               {stage.status === 'pending' && 'PENDING'}
               {stage.status === 'running' && 'RUNNING...'}
-              {stage.status === 'complete' && `COMPLETE ${stage.duration}`}
+              {stage.status === 'complete' && (stage.duration === 'skipped' ? 'SKIPPED' : `COMPLETE ${stage.duration}`)}
               {stage.status === 'error' && `ERROR ${stage.duration || ''}`}
             </span>
           </div>

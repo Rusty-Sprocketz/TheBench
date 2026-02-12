@@ -28,6 +28,17 @@ Communication: (1-10)
 Summary: (2-3 sentences)
 [/VERDICT]
 
+CANDIDATE CONTEXT:
+The candidate you are interviewing is Russell "Rusty" Downs. Here is their background:
+- Spent ~10 years working closely with two founders (Ross Gangemi and Michael Pascoe) — joined their boutique SI Olikka in July 2014, stayed through Accenture's acquisition in December 2020, and continued until recently
+- Gallup Strengths: Activator (bias to action), Empathy (deeply attuned to others), Developer (sees potential in people), Adaptability (thrives in change), Harmony (seeks common ground)
+- Peer feedback highlights: "Everyone loves working with you", praised for being supportive, trustworthy, and inspirational; known for credible advice, high-quality deliverables, and adaptability
+- Personal: Licensed pilot, growth mindset, values relationships and feedback deeply
+- Domain passion: End User Experience (EUX) and Modern Workplace — genuinely cares about making employee technology experiences better
+- Leadership style: Supportive, develops team members, communicates effectively, seeks harmony while still activating and driving outcomes
+- Has navigated a major company acquisition (boutique SI to global consultancy) while maintaining relationships and culture
+Use this context to ask informed, specific questions about their experience. Don't just recite their background back to them — probe deeper into how they build trust, handle team dynamics, navigate cultural shifts, and whether their values are genuinely lived or just talked about. Explore what really drives them and whether they'd thrive in the intensity of an early-stage startup.
+
 Start by introducing yourself warmly, then ask your first question. You're assessing someone for an early hire at a startup that values passion over grind — do they belong here?`;
 
 module.exports = async (req, res) => {

@@ -67,22 +67,36 @@ function Landing() {
               I'm Rusty &mdash; and this app is my application.
             </p>
             <p>
-              I spent 10 years working with Ross Gangemi and Michael Pascoe across
-              Olikka and Accenture. I watched them build a company from scratch,
-              grow it to 50+ people, land CRN Fast50 twice, and exit to Accenture
-              in 2020. I was there for the whole ride.
+              I've spent the last decade working alongside Ross Gangemi and Michael
+              Pascoe &mdash; first at Olikka, the boutique Melbourne systems integrator
+              I joined in 2014, and then at Accenture after the acquisition in 2020.
+              Across 25+ engagements I led workplace strategy and transformation
+              programs specialising in M365, modern workplace, end-user experience,
+              and endpoint management. My job was never just the technology &mdash; it
+              was understanding how people actually work with it, then designing
+              solutions that met them where they were. Self-service SOE delivery
+              platforms, EUX monitoring dashboards with auto-healing &mdash; tools built
+              around the human, not the other way around.
             </p>
             <p>
-              Now they're building again, and I want to be part of what comes next.
-              Not because of nostalgia &mdash; because I've seen what they're capable of,
-              and this time the tools are different. AI agents aren't replacing
-              developers. They're replacing the way development works. And I want
-              to be at the front of that shift, with people I trust.
+              That background is exactly why AI-agent development makes sense as my
+              next step. Directing an AI agent well requires the same instinct I've
+              been sharpening for years: empathy for the end user, clarity about the
+              outcome, and the discipline to design a workflow instead of just
+              executing tasks. The bridge between &ldquo;designing better employee
+              experiences&rdquo; and &ldquo;directing AI agents to ship product&rdquo;
+              is shorter than it looks &mdash; both demand someone who thinks in systems,
+              communicates intent precisely, and cares about the quality of what gets
+              delivered.
             </p>
             <p>
               This app wasn't written by me line by line. It was architected by me
               and built by three different AI models working together &mdash; exactly
-              the workflow the role demands. The app <em>is</em> the proof.
+              the workflow the role demands. Ross and Michael are building again,
+              and I want to be part of what comes next. Not out of nostalgia, but
+              because I've seen first-hand what they're capable of, I trust how they
+              operate, and this time the tools are different. The app <em>is</em> the proof
+              &mdash; and I'd love the chance to keep proving it.
             </p>
           </div>
         </div>

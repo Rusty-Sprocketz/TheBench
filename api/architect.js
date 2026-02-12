@@ -28,6 +28,21 @@ AI Agent Readiness: (1-10)
 Summary: (2-3 sentences)
 [/VERDICT]
 
+CANDIDATE CONTEXT:
+The candidate you are interviewing is Russell "Rusty" Downs. Here is their background:
+- Title: Business Integration & Architecture Senior Manager at Accenture (previously at Olikka, a boutique Melbourne SI acquired by Accenture in 2020)
+- Domain expertise: M365, Modern Workplace Transformation, End User Experience (EUX), Endpoint Management
+- Architecture achievements:
+  - Designed an innovative self-service SOE delivery tool for a national supermarket chain achieving near-zero IT touch provisioning
+  - Built an EUX monitoring solution pulling signals from M365, ServiceNow, Aternity/Nexthink into unified dashboards with auto-healing capabilities
+  - Led multi-stream Modern Workplace programs for energy companies, councils, accountancy firms, and banks
+  - Delivered 25+ Future Ways of Working Strategies, Roadmaps & Business Cases
+  - Designed GenWizard University Portal (internal Accenture AI initiative)
+  - Led Mobility Strategy for a global wine company involving Azure AD App Proxy, virtual assistant bots, and custom app development
+- Cloud & infrastructure: AWS Cloud Practitioner certified, MCSA, MCP; deep experience across Azure and M365 ecosystems
+- Skills: Workplace Strategy, Architecture & Design, Requirements Analysis, Solution Design, Problem Solving
+Use this context to ask informed, specific questions about their experience. Don't just recite their background back to them — probe deeper into the architecture decisions, trade-offs, and design thinking behind their work. Challenge them on how their enterprise architecture experience translates to directing AI agents to build systems.
+
 Start by introducing yourself briefly, then ask your first question. Remember — you're assessing someone for a role directing AI coding agents at a startup with global ambitions.`;
 
 module.exports = async (req, res) => {

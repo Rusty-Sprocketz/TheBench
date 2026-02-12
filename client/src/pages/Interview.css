@@ -67,6 +67,33 @@
   color: var(--text-muted);
 }
 
+/* Start buttons */
+.start-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+/* Demo banner */
+.demo-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 16px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: 12px;
+  font-size: 13px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.demo-banner-btn {
+  padding: 6px 14px;
+  font-size: 12px;
+}
+
 /* Interview layout */
 .interview {
   display: flex;

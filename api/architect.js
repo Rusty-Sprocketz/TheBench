@@ -43,7 +43,7 @@ module.exports = async (req, res) => {
     });
 
     const response = await client.messages.create({
-      model: 'claude-sonnet-4-5-20250514',
+      model: 'claude-sonnet-4-5-20250929',
       max_tokens: 1024,
       system: ARCHITECT_SYSTEM_PROMPT,
       messages: messages.map(m => ({

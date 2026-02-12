@@ -18,6 +18,9 @@ function App() {
           <Route path="/how-it-works" element={<HowItWorks />} />
         </Routes>
       </main>
+      <footer className="site-footer">
+        <span>The Bench v2.0.1</span>
+      </footer>
     </>
   )
 }

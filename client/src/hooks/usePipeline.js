@@ -229,7 +229,15 @@ export function usePipeline() {
     setTimeout(() => launch(), 100);
   }, [projectName, launch]);
 
-  const clear = useCallback(() => {
+  const clear = useCallback(async () => {
+    // Tear down the deployed app
+    if (projectName) {
+      try {
+        await api.cleanup(projectName);
+      } catch {
+        // ignore cleanup errors
+      }
+    }
     clearPersistedState();
     setProjectName(null);
     setTargetUrl(null);
@@ -244,7 +252,7 @@ export function usePipeline() {
     }
     setStages(fresh);
     setPipelineStatus('idle');
-  }, []);
+  }, [projectName]);
 
   const retryStage = useCallback(async (stageName) => {
     if (!pipelineDataRef.current.spec) return;

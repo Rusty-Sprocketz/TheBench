@@ -39,7 +39,7 @@ function HowItWorks() {
             </div>
             <div className="arch-node agent culture">
               <div className="arch-label">The Culture Lead</div>
-              <div className="arch-detail mono">Gemini 1.5 Flash</div>
+              <div className="arch-detail mono">Gemini 2.0 Flash</div>
               <div className="arch-provider">Google AI API</div>
             </div>
           </div>
@@ -106,7 +106,7 @@ function HowItWorks() {
         <div className="prompt-card culture">
           <div className="prompt-header">
             <span className="prompt-dot"></span>
-            <h3>The Culture Lead &mdash; Gemini 1.5 Flash</h3>
+            <h3>The Culture Lead &mdash; Gemini 2.0 Flash</h3>
           </div>
           <div className="prompt-content">
             <p><strong>Role:</strong> Values and vision interviewer</p>

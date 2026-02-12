@@ -40,7 +40,7 @@ module.exports = async (req, res) => {
 
     const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
     const model = genAI.getGenerativeModel({
-      model: 'gemini-1.5-flash',
+      model: 'gemini-2.0-flash',
       systemInstruction: CULTURE_SYSTEM_PROMPT,
     });
 
@@ -57,7 +57,7 @@ module.exports = async (req, res) => {
 
     res.json({
       agent: 'culture',
-      model: 'Gemini 1.5 Flash (Google)',
+      model: 'Gemini 2.0 Flash (Google)',
       message: text,
       hasVerdict,
     });

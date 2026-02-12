@@ -22,7 +22,7 @@ const AGENTS = [
   {
     id: 'culture',
     name: 'The Culture Lead',
-    model: 'Gemini 1.5 Flash (Google)',
+    model: 'Gemini 2.0 Flash (Google)',
     endpoint: '/api/culture',
     color: 'var(--culture-color)',
     description: 'Values, vision & team fit',

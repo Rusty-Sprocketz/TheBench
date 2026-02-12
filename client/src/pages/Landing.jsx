@@ -48,7 +48,7 @@ function Landing() {
           </div>
           <div className="agent-card culture">
             <div className="agent-indicator"></div>
-            <div className="agent-model">Gemini 1.5 Flash &middot; Google</div>
+            <div className="agent-model">Gemini 2.0 Flash &middot; Google</div>
             <h3>The Culture Lead</h3>
             <p>
               Explores your alignment with a fast-moving startup, your genuine

@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom'
+import PipelineDemo from '../components/PipelineDemo'
 import './AgentOps.css'
 
 function AgentOps() {
@@ -8,6 +9,9 @@ function AgentOps() {
         <h1>AgentOps</h1>
         <p className="agentops-subtitle">How I Direct AI Agents to Ship Software</p>
       </div>
+
+      {/* Live Pipeline Demo */}
+      <PipelineDemo />
 
       {/* Feature request */}
       <div className="feature-request">
@@ -192,7 +196,8 @@ src/db/migrations/001.sql ✓ 18 lines`}</div>
       {/* Footer CTA */}
       <div className="agentops-cta">
         <p>
-          This isn&rsquo;t theoretical &mdash; I built The Bench using exactly this workflow.
+          This isn&rsquo;t theoretical &mdash; hit &ldquo;Launch Pipeline&rdquo; above and watch
+          five agents build a real app from scratch.
         </p>
         <p>
           <Link to="/how-it-works">See the full technical breakdown &rarr;</Link>

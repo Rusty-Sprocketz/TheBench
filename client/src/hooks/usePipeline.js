@@ -75,6 +75,8 @@ export function usePipeline() {
 
   const cancelledRef = useRef(false);
   const pipelineDataRef = useRef({ spec: null, files: null });
+  const projectNameRef = useRef(projectName);
+  projectNameRef.current = projectName;
 
   // Persist deployed state
   useEffect(() => {
@@ -204,21 +206,23 @@ export function usePipeline() {
   const cancel = useCallback(async () => {
     cancelledRef.current = true;
     // Tear down the project if it was already created during preflight
-    if (projectName) {
+    const name = projectNameRef.current;
+    if (name) {
       try {
-        await api.cleanup(projectName);
+        await api.cleanup(name);
       } catch {
         // ignore cleanup errors
       }
     }
     setPipelineStatus('idle');
-  }, [projectName]);
+  }, []);
 
   const startOver = useCallback(async () => {
     // Cleanup existing deployment if any
-    if (projectName) {
+    const name = projectNameRef.current;
+    if (name) {
       try {
-        await api.cleanup(projectName);
+        await api.cleanup(name);
       } catch {
         // ignore cleanup errors
       }
@@ -235,13 +239,14 @@ export function usePipeline() {
 
     // Relaunch
     setTimeout(() => launch(), 100);
-  }, [projectName, launch]);
+  }, [launch]);
 
   const clear = useCallback(async () => {
     // Tear down the deployed app
-    if (projectName) {
+    const name = projectNameRef.current;
+    if (name) {
       try {
-        await api.cleanup(projectName);
+        await api.cleanup(name);
       } catch {
         // ignore cleanup errors
       }
@@ -255,12 +260,12 @@ export function usePipeline() {
     setTotalDuration(null);
     setSourceFiles(null);
     const fresh = {};
-    for (const name of STAGES) {
-      fresh[name] = { ...INITIAL_STAGE(), label: STAGE_LABELS[name] };
+    for (const stageName of STAGES) {
+      fresh[stageName] = { ...INITIAL_STAGE(), label: STAGE_LABELS[stageName] };
     }
     setStages(fresh);
     setPipelineStatus('idle');
-  }, [projectName]);
+  }, []);
 
   const retryStage = useCallback(async (stageName) => {
     if (!pipelineDataRef.current.spec) return;

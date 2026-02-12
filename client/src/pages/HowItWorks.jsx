@@ -327,15 +327,15 @@ function HowItWorks() {
         <h2>Why This Role, Why Now</h2>
         <div className="note-card">
           <p>
-            The shift to AI-directed development isn't theoretical for me &mdash; it's how I built
-            this app. I didn't write this code line by line. I architected the system, chose the
+            The shift to AI-directed development isn&rsquo;t theoretical for me &mdash; it&rsquo;s how I built
+            this app (and f1tenthspot.com). I didn&rsquo;t write this code line by line. I architected the system, chose the
             models, wrote the prompts, directed the agents, and made judgment calls when they got
             things wrong.
           </p>
           <p>
-            That's exactly what this role requires. And I've spent 10 years working with Ross and
-            Michael &mdash; I know how they build things. I know the pace, the standards, and the
-            ambition. I want to be part of what they build next, because I believe the way we build
+            That&rsquo;s exactly what this role requires. I&rsquo;ve spent 10 years working with Ross and
+            Pascoe &mdash; I know how they do things. I know the pace, the standards, the
+            ambition and the high-performance culture required. I want to be part of what they build next, because I believe the way we build
             software is genuinely changing, and being at the ground level of that shift with people
             I trust is where I want to be.
           </p>

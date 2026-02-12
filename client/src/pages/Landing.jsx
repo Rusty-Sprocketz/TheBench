@@ -65,26 +65,30 @@ function Landing() {
         <div className="about-card">
           <div className="about-content">
             <p className="about-lead">
-              I'm Rusty &mdash; and this app is my application.
+              I&rsquo;m Rusty &mdash; and this app is my application.
             </p>
             <p>
-              I've spent the last decade working alongside Ross Gangemi and Michael
-              Pascoe &mdash; first at Olikka, the boutique Melbourne systems integrator
-              I joined in 2014, and then at Accenture after the acquisition in 2020.
-              Across 25+ engagements I led workplace strategy and transformation
-              programs specialising in M365, modern workplace, end-user experience,
-              and endpoint management. Most recently at Arinco, I led the delivery
-              of a global Intune endpoint management solution for PEXA&rsquo;s 2,000 staff
-              and am currently leading a tenant migration and Intune rollout at TAC.
+              I&rsquo;ve spent the last decade working alongside Ross and Pascoe &mdash;
+              first at Olikka, the boutique Melbourne systems integrator they took a
+              leap on me to join in 2014, and then at Accenture after the acquisition
+              in 2020. Across 25+ engagements I led Workplace-Strategy and Transformation
+              programs specialising in M365, Modern Workplace, End-User Experience,
+              and Endpoint Management. Most recently at Arinco, I led the delivery
+              of a global Intune Endpoint Management solution for PEXA&rsquo;s 2,000 staff
+              and am currently leading a tenant migration and SCCM-Intune migration
+              (with Autopilot, MDM + MAM) at TAC.
+            </p>
+            <p>
               My job has never been just the technology &mdash; it&rsquo;s understanding how
               people actually work with it, then designing solutions that meet them
               where they are. Self-service SOE platforms, EUX monitoring dashboards
               with auto-healing, global device management &mdash; tools built around the
-              human, not the other way around.
+              human, not the other way around. Ross and Pascoe know that it&rsquo;s people
+              that motivate me, not tech.
             </p>
             <p>
               That background is exactly why AI-agent development makes sense as my
-              next step. Directing an AI agent well requires the same instinct I've
+              next step. Directing an AI agent well requires the same instinct I&rsquo;ve
               been sharpening for years: empathy for the end user, clarity about the
               outcome, and the discipline to design a workflow instead of just
               executing tasks. The bridge between &ldquo;designing better employee
@@ -94,13 +98,13 @@ function Landing() {
               delivered.
             </p>
             <p>
-              This app wasn't written by me line by line. It was architected by me
+              This app wasn&rsquo;t written by me line by line. It was architected by me
               and built by three different AI models working together &mdash; exactly
-              the workflow the role demands. Ross and Michael are building again,
+              the workflow the role demands. Ross and Pascoe are building again,
               and I want to be part of what comes next. Not out of nostalgia, but
-              because I've seen first-hand what they're capable of, I trust how they
+              because I&rsquo;ve seen first-hand what they&rsquo;re capable of, I trust how they
               operate, and this time the tools are different. The app <em>is</em> the proof
-              &mdash; and I'd love the chance to keep proving it.
+              &mdash; and I&rsquo;d love the chance to keep proving it.
             </p>
           </div>
         </div>

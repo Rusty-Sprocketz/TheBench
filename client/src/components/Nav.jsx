@@ -10,6 +10,7 @@ function Nav() {
         <Link to="/" className="nav-logo">
           <span className="nav-logo-icon">///</span>
           <span className="nav-logo-text">The Bench</span>
+          <span className="nav-version">v2.0.0</span>
         </Link>
         <div className="nav-links">
           <Link

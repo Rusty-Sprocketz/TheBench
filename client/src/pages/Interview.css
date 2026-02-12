@@ -160,6 +160,24 @@
   font-weight: 600;
 }
 
+.tab-verdict {
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.tab-verdict.hire {
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--accent-green);
+}
+
+.tab-verdict.no-hire {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+}
+
 /* Agent header */
 .agent-header {
   display: flex;
@@ -280,25 +298,147 @@
   30% { opacity: 1; transform: scale(1); }
 }
 
-/* Complete */
-.interview-complete {
+/* Summary panel */
+.interview-summary {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.summary-overall {
   text-align: center;
   padding: 24px;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+}
+
+.summary-overall.hire {
+  background: rgba(16, 185, 129, 0.08);
+  border-color: rgba(16, 185, 129, 0.3);
+}
+
+.summary-overall.no-hire {
+  background: rgba(239, 68, 68, 0.08);
+  border-color: rgba(239, 68, 68, 0.3);
+}
+
+.summary-overall h2 {
+  font-size: 24px;
+  font-weight: 800;
+  margin-bottom: 4px;
+}
+
+.summary-overall.hire h2 { color: var(--accent-green); }
+.summary-overall.no-hire h2 { color: #ef4444; }
+
+.summary-overall-score {
+  font-size: 14px;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.summary-agents {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.summary-agent-card {
   background: var(--bg-card);
   border: 1px solid var(--border);
   border-radius: 12px;
-  margin-top: 12px;
+  padding: 16px;
+  border-top: 3px solid transparent;
 }
 
-.interview-complete h2 {
-  font-size: 20px;
+.summary-agent-card.architect { border-top-color: var(--architect-color); }
+.summary-agent-card.operator { border-top-color: var(--operator-color); }
+.summary-agent-card.culture { border-top-color: var(--culture-color); }
+
+.summary-agent-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.summary-agent-name {
   font-weight: 700;
-  margin-bottom: 8px;
+  font-size: 14px;
 }
 
-.interview-complete p {
+.summary-agent-rating {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.summary-agent-rating.hire {
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--accent-green);
+}
+
+.summary-agent-rating.no-hire {
+  background: rgba(239, 68, 68, 0.15);
+  color: #ef4444;
+}
+
+.summary-scores {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-bottom: 12px;
+}
+
+.summary-score-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+}
+
+.summary-score-label {
+  width: 120px;
+  flex-shrink: 0;
   color: var(--text-secondary);
-  font-size: 14px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.summary-score-bar-track {
+  flex: 1;
+  height: 6px;
+  background: var(--bg-secondary);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.summary-score-bar-fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.6s ease;
+}
+
+.summary-score-bar-fill.architect { background: var(--architect-color); }
+.summary-score-bar-fill.operator { background: var(--operator-color); }
+.summary-score-bar-fill.culture { background: var(--culture-color); }
+
+.summary-score-value {
+  width: 20px;
+  text-align: right;
+  font-weight: 600;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+}
+
+.summary-agent-text {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.5;
+  margin: 0;
 }
 
 @media (max-width: 768px) {
@@ -313,5 +453,9 @@
 
   .tab-name {
     font-size: 12px;
+  }
+
+  .summary-agents {
+    grid-template-columns: 1fr;
   }
 }

@@ -1,3 +1,4 @@
+import Markdown from 'react-markdown'
 import './ChatMessage.css'
 
 function ChatMessage({ message, agentType }) {
@@ -13,7 +14,7 @@ function ChatMessage({ message, agentType }) {
 
     return (
       <>
-        {before && <p>{before}</p>}
+        {before && <Markdown>{before}</Markdown>}
         <div className="verdict-block">
           <div className="verdict-header">Final Verdict</div>
           {verdictContent.split('\n').map((line, i) => {
@@ -43,9 +44,7 @@ function ChatMessage({ message, agentType }) {
       )}
       <div className={`message-bubble ${isVerdict ? 'has-verdict' : ''}`}>
         {isVerdict ? formatVerdict(message.content) : (
-          message.content.split('\n').map((line, i) => (
-            <p key={i}>{line || '\u00A0'}</p>
-          ))
+          <Markdown>{message.content}</Markdown>
         )}
       </div>
     </div>

@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import ChatMessage from '../components/ChatMessage'
+import parseVerdict from '../utils/parseVerdict'
 import './Interview.css'
 
 const AGENTS = [
@@ -392,7 +393,12 @@ function Interview() {
           >
             <span className="tab-indicator"></span>
             <span className="tab-name">{agent.name}</span>
-            {verdicts[agent.id] && <span className="tab-check">Done</span>}
+            {verdicts[agent.id] && (() => {
+              const v = parseVerdict(verdicts[agent.id])
+              if (!v) return <span className="tab-check">Done</span>
+              const isHire = v.rating.toLowerCase().includes('hire') && !v.rating.toLowerCase().includes('no hire')
+              return <span className={`tab-verdict ${isHire ? 'hire' : 'no-hire'}`}>{v.rating} {v.average}</span>
+            })()}
           </button>
         ))}
       </div>
@@ -449,13 +455,65 @@ function Interview() {
         </div>
       )}
 
-      {/* All done */}
-      {allDone && (
-        <div className="interview-complete">
-          <h2>Interview Complete</h2>
-          <p>All three agents have delivered their verdicts. Review each tab above to see the full conversations and results.</p>
-        </div>
-      )}
+      {/* Summary panel */}
+      {allDone && (() => {
+        const agentVerdicts = AGENTS.map(a => ({
+          agent: a,
+          verdict: parseVerdict(verdicts[a.id]),
+        })).filter(v => v.verdict)
+
+        if (agentVerdicts.length === 0) return null
+
+        const allScores = agentVerdicts.flatMap(v => v.verdict.scores.map(s => s.value))
+        const overallAverage = allScores.length > 0
+          ? Math.round((allScores.reduce((a, b) => a + b, 0) / allScores.length) * 10) / 10
+          : null
+
+        // Majority logic for overall rating
+        const ratings = agentVerdicts.map(v => v.verdict.rating.toLowerCase())
+        const hireCount = ratings.filter(r => r.includes('hire') && !r.includes('no hire')).length
+        const overallRating = hireCount > agentVerdicts.length / 2 ? 'Strong Hire' : 'No Hire'
+        const isOverallHire = overallRating === 'Strong Hire'
+
+        return (
+          <div className="interview-summary">
+            <div className={`summary-overall ${isOverallHire ? 'hire' : 'no-hire'}`}>
+              <h2>{overallRating}</h2>
+              <span className="summary-overall-score">{overallAverage} / 10 average</span>
+            </div>
+            <div className="summary-agents">
+              {agentVerdicts.map(({ agent, verdict }) => {
+                const agentHire = verdict.rating.toLowerCase().includes('hire') && !verdict.rating.toLowerCase().includes('no hire')
+                return (
+                  <div key={agent.id} className={`summary-agent-card ${agent.id}`}>
+                    <div className="summary-agent-header">
+                      <span className="summary-agent-name">{agent.name}</span>
+                      <span className={`summary-agent-rating ${agentHire ? 'hire' : 'no-hire'}`}>
+                        {verdict.rating} {verdict.average}
+                      </span>
+                    </div>
+                    <div className="summary-scores">
+                      {verdict.scores.map(s => (
+                        <div key={s.label} className="summary-score-row">
+                          <span className="summary-score-label">{s.label}</span>
+                          <div className="summary-score-bar-track">
+                            <div
+                              className={`summary-score-bar-fill ${agent.id}`}
+                              style={{ width: `${s.value * 10}%` }}
+                            />
+                          </div>
+                          <span className="summary-score-value">{s.value}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <p className="summary-agent-text">{verdict.summary}</p>
+                  </div>
+                )
+              })}
+            </div>
+          </div>
+        )
+      })()}
     </div>
   )
 }

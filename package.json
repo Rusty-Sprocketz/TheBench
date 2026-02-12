@@ -1,0 +1,11 @@
+{
+  "name": "the-bench",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Multi-Agent AI Interview App",
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.74.0",
+    "@google/generative-ai": "^0.24.1",
+    "openai": "^6.21.0"
+  }
+}

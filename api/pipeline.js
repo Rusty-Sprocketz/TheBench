@@ -356,7 +356,7 @@ async function handleDeployer(req, res) {
 
   const allFiles = { ...files, 'build-log.json': JSON.stringify(buildLog || {}, null, 2) };
 
-  // Create project
+  // Step 1: Create project
   const projRes = await fetch(`${VERCEL_API}/v9/projects?teamId=${teamId}`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
@@ -365,7 +365,18 @@ async function handleDeployer(req, res) {
   if (!projRes.ok) throw new Error(`Failed to create project: ${projRes.status} ${await projRes.text()}`);
   const project = await projRes.json();
 
-  // Set env vars for AI-powered apps
+  // Step 2: Disable Deployment Protection so the app is publicly accessible
+  await fetch(`${VERCEL_API}/v9/projects/${project.id}?teamId=${teamId}`, {
+    method: 'PATCH',
+    headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      passwordProtection: null,
+      ssoProtection: null,
+      vercelAuthentication: { deploymentType: 'none' },
+    }),
+  });
+
+  // Step 3: Set env vars for AI-powered apps
   if (spec?.appType === 'ai-micro-tool' && process.env.GEMINI_API_KEY) {
     await fetch(`${VERCEL_API}/v10/projects/${project.id}/env?teamId=${teamId}`, {
       method: 'POST',
@@ -374,7 +385,7 @@ async function handleDeployer(req, res) {
     });
   }
 
-  // Deploy
+  // Step 4: Deploy
   const fileEntries = Object.entries(allFiles).map(([file, data]) => ({ file, data }));
   const depRes = await fetch(`${VERCEL_API}/v13/deployments?teamId=${teamId}`, {
     method: 'POST',
@@ -384,7 +395,7 @@ async function handleDeployer(req, res) {
   if (!depRes.ok) throw new Error(`Failed to deploy: ${depRes.status} ${await depRes.text()}`);
   const deployment = await depRes.json();
 
-  // Poll until ready
+  // Step 5: Poll until ready
   for (let i = 0; i < 30; i++) {
     const pr = await fetch(`${VERCEL_API}/v13/deployments/${deployment.id}`, {
       headers: { Authorization: `Bearer ${token}` },
@@ -393,7 +404,16 @@ async function handleDeployer(req, res) {
     const d = await pr.json();
     const state = d.readyState || d.state;
     if (state === 'READY') {
-      return res.json({ stage: 'deployer', url: `https://${d.url || `${projectName}.vercel.app`}`, projectId: project.id, deploymentId: deployment.id, projectName, createdAt: Date.now() });
+      // Step 6: Explicitly alias to the clean project URL
+      const aliasUrl = `${projectName}.vercel.app`;
+      await fetch(`${VERCEL_API}/v2/deployments/${deployment.id}/aliases?teamId=${teamId}`, {
+        method: 'POST',
+        headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ alias: aliasUrl }),
+      });
+
+      const finalUrl = `https://${aliasUrl}`;
+      return res.json({ stage: 'deployer', url: finalUrl, projectId: project.id, deploymentId: deployment.id, projectName, createdAt: Date.now() });
     }
     if (state === 'ERROR' || state === 'CANCELED') throw new Error(`Deployment ${state}: ${d.errorMessage || 'unknown'}`);
     await new Promise(r => setTimeout(r, 2000));

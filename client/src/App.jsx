@@ -19,7 +19,7 @@ function App() {
         </Routes>
       </main>
       <footer className="site-footer">
-        <span>The Bench v2.7.3</span>
+        <span>The Bench v2.7.4</span>
       </footer>
     </>
   )

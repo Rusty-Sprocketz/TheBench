@@ -148,10 +148,10 @@ function Interview() {
   }, [currentMessages, loading])
 
   useEffect(() => {
-    if (started && !loading) {
+    if (started && !loading && !demoMode) {
       inputRef.current?.focus()
     }
-  }, [started, loading, currentAgentIndex])
+  }, [started, loading, currentAgentIndex, demoMode])
 
   const startInterview = async () => {
     setStarted(true)
@@ -442,49 +442,52 @@ function Interview() {
 
   return (
     <div className="interview">
-      {/* Demo mode banner */}
-      {demoMode && (
-        <div className="demo-banner">
-          <span>Demo Mode — Showing a sample interview</span>
-          <button className="btn btn-secondary demo-banner-btn" onClick={exitDemoMode}>
-            Start Live Interview
-          </button>
+      {/* Sticky top panels */}
+      <div className="interview-top">
+        {/* Demo mode banner */}
+        {demoMode && (
+          <div className="demo-banner">
+            <span>Demo Mode — Showing a sample interview</span>
+            <button className="btn btn-secondary demo-banner-btn" onClick={exitDemoMode}>
+              Start Live Interview
+            </button>
+          </div>
+        )}
+
+        {/* Agent tabs */}
+        <div className="agent-tabs">
+          {AGENTS.map((agent, i) => (
+            <button
+              key={agent.id}
+              className={`agent-tab ${agent.id} ${i === currentAgentIndex ? 'active' : ''} ${verdicts[agent.id] ? 'completed' : ''}`}
+              onClick={() => {
+                if (demoMode || conversations[agent.id].length > 0) {
+                  setCurrentAgentIndex(i)
+                }
+              }}
+              disabled={!demoMode && conversations[agent.id].length === 0}
+            >
+              <span className="tab-indicator"></span>
+              <span className="tab-name">{agent.name}</span>
+              {verdicts[agent.id] && (() => {
+                const v = parseVerdict(verdicts[agent.id])
+                if (!v) return <span className="tab-check">Done</span>
+                const isHire = v.rating.toLowerCase().includes('hire') && !v.rating.toLowerCase().includes('no hire')
+                return <span className={`tab-verdict ${isHire ? 'hire' : 'no-hire'}`}><span className="tab-verdict-rating">{v.rating} </span>{v.average}</span>
+              })()}
+            </button>
+          ))}
         </div>
-      )}
 
-      {/* Agent tabs */}
-      <div className="agent-tabs">
-        {AGENTS.map((agent, i) => (
-          <button
-            key={agent.id}
-            className={`agent-tab ${agent.id} ${i === currentAgentIndex ? 'active' : ''} ${verdicts[agent.id] ? 'completed' : ''}`}
-            onClick={() => {
-              if (demoMode || conversations[agent.id].length > 0) {
-                setCurrentAgentIndex(i)
-              }
-            }}
-            disabled={!demoMode && conversations[agent.id].length === 0}
-          >
-            <span className="tab-indicator"></span>
-            <span className="tab-name">{agent.name}</span>
-            {verdicts[agent.id] && (() => {
-              const v = parseVerdict(verdicts[agent.id])
-              if (!v) return <span className="tab-check">Done</span>
-              const isHire = v.rating.toLowerCase().includes('hire') && !v.rating.toLowerCase().includes('no hire')
-              return <span className={`tab-verdict ${isHire ? 'hire' : 'no-hire'}`}><span className="tab-verdict-rating">{v.rating} </span>{v.average}</span>
-            })()}
-          </button>
-        ))}
-      </div>
-
-      {/* Active agent info */}
-      <div className={`agent-header ${currentAgent.id}`}>
-        <div className="agent-dot"></div>
-        <div>
-          <div className="agent-header-name">{currentAgent.name}</div>
-          <div className="agent-header-meta">
-            <span className="mono">{currentAgent.model}</span>
-            <span className="agent-header-desc">{currentAgent.description}</span>
+        {/* Active agent info */}
+        <div className={`agent-header ${currentAgent.id}`}>
+          <div className="agent-dot"></div>
+          <div>
+            <div className="agent-header-name">{currentAgent.name}</div>
+            <div className="agent-header-meta">
+              <span className="mono">{currentAgent.model}</span>
+              <span className="agent-header-desc">{currentAgent.description}</span>
+            </div>
           </div>
         </div>
       </div>
@@ -507,7 +510,7 @@ function Interview() {
       </div>
 
       {/* Input */}
-      {!allDone && !verdicts[currentAgent.id] && (
+      {!allDone && !verdicts[currentAgent.id] && !demoMode && (
         <div className="chat-input-area">
           <textarea
             ref={inputRef}

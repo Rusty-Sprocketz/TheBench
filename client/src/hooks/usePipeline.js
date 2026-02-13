@@ -18,6 +18,7 @@ const INITIAL_STAGE = () => ({
   label: '',
   output: null,
   error: null,
+  errorDetail: null,
   startTime: null,
   duration: null,
 });
@@ -111,6 +112,7 @@ export function usePipeline() {
       updateStage(name, {
         status: 'error',
         error: err.message || 'Unknown error',
+        errorDetail: err.detail || null,
         duration: `${duration}s`,
       });
       throw err;

@@ -89,6 +89,26 @@
   background: var(--border);
 }
 
+/* Error guidance banner */
+.pipeline-demo__error-banner {
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.2);
+  border-radius: 8px;
+  padding: 12px 16px;
+  margin-top: 16px;
+}
+
+.pipeline-demo__error-banner p {
+  font-size: 13px;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.pipeline-demo__error-banner strong {
+  color: var(--text-primary);
+}
+
 /* Controls */
 .pipeline-demo__controls {
   display: flex;

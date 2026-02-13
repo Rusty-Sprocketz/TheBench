@@ -95,6 +95,17 @@ function PipelineDemo() {
         />
       )}
 
+      {/* Error guidance */}
+      {pipelineStatus === 'error' && (
+        <div className="pipeline-demo__error-banner">
+          <p>
+            Agents are attempting to build this app live &mdash; sometimes things go wrong.
+            Try <strong>Retry Stage</strong> on the failed step. If that doesn&rsquo;t work,
+            scroll down and hit <strong>Start Over</strong> to try a fresh run.
+          </p>
+        </div>
+      )}
+
       {/* Controls */}
       <div className="pipeline-demo__controls">
         {pipelineStatus === 'idle' && (

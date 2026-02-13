@@ -105,10 +105,20 @@ function PipelineStage({ name, stage, onRetry }) {
           <div className="pipeline-live-stage__summary">{summary}</div>
         )}
 
-        {stage.status === 'error' && onRetry && (
-          <button className="pipeline-live-stage__retry" onClick={() => onRetry(name)}>
-            Retry Stage
-          </button>
+        {stage.status === 'error' && (
+          <>
+            {stage.errorDetail && (
+              <details className="pipeline-live-stage__details">
+                <summary>View Error Detail</summary>
+                <pre>{stage.errorDetail}</pre>
+              </details>
+            )}
+            {onRetry && (
+              <button className="pipeline-live-stage__retry" onClick={() => onRetry(name)}>
+                Retry Stage
+              </button>
+            )}
+          </>
         )}
 
         {stage.status === 'complete' && name === 'architect' && stage.output?.spec && (

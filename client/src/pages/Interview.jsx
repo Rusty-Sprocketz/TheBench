@@ -138,6 +138,7 @@ function Interview() {
   const [demoMode, setDemoMode] = useState(false)
   const chatEndRef = useRef(null)
   const inputRef = useRef(null)
+  const demoAbortRef = useRef(false)
 
   const currentAgent = AGENTS[currentAgentIndex]
   const currentMessages = conversations[currentAgent.id]
@@ -192,27 +193,76 @@ function Interview() {
     }
   }
 
-  const startDemoMode = () => {
+  const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms))
+
+  const startDemoMode = async () => {
+    demoAbortRef.current = false
     setDemoMode(true)
     setStarted(true)
-    setConversations(DEMO_CONVERSATIONS)
+    setConversations({ architect: [], operator: [], culture: [] })
+    setVerdicts({})
+    setAllDone(false)
 
-    // Extract verdicts from the demo conversations
-    const demoVerdicts = {}
-    for (const agentId of Object.keys(DEMO_CONVERSATIONS)) {
-      const messages = DEMO_CONVERSATIONS[agentId]
-      const lastMessage = messages[messages.length - 1]
-      if (lastMessage && lastMessage.content.includes('[VERDICT]')) {
-        demoVerdicts[agentId] = lastMessage.content
+    const agentIds = ['architect', 'operator', 'culture']
+
+    for (let agentIdx = 0; agentIdx < agentIds.length; agentIdx++) {
+      if (demoAbortRef.current) return
+      const agentId = agentIds[agentIdx]
+      const demoMessages = DEMO_CONVERSATIONS[agentId]
+
+      setCurrentAgentIndex(agentIdx)
+
+      // Reveal messages in pairs (user + assistant)
+      for (let i = 0; i < demoMessages.length; i++) {
+        if (demoAbortRef.current) return
+        const msg = demoMessages[i]
+
+        if (msg.role === 'user') {
+          // Show user message
+          setConversations(prev => ({
+            ...prev,
+            [agentId]: [...prev[agentId], msg],
+          }))
+          await sleep(300)
+        } else if (msg.role === 'assistant') {
+          // Show typing indicator
+          setLoading(true)
+          await sleep(600)
+          if (demoAbortRef.current) { setLoading(false); return }
+
+          // Show assistant message
+          setConversations(prev => ({
+            ...prev,
+            [agentId]: [...prev[agentId], msg],
+          }))
+          setLoading(false)
+
+          // Check if this is a verdict message
+          if (msg.content.includes('[VERDICT]')) {
+            setVerdicts(prev => ({ ...prev, [agentId]: msg.content }))
+            await sleep(800)
+          } else {
+            await sleep(400)
+          }
+        }
+      }
+
+      // Pause between agents
+      if (agentIdx < agentIds.length - 1) {
+        await sleep(600)
       }
     }
-    setVerdicts(demoVerdicts)
-    setAllDone(true)
+
+    if (!demoAbortRef.current) {
+      setAllDone(true)
+    }
   }
 
   const exitDemoMode = () => {
+    demoAbortRef.current = true
     setDemoMode(false)
     setStarted(false)
+    setLoading(false)
     setCurrentAgentIndex(0)
     setConversations({ architect: [], operator: [], culture: [] })
     setVerdicts({})

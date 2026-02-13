@@ -1,7 +1,10 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import './Landing.css'
 
 function Landing() {
+  const [activeTab, setActiveTab] = useState('interview')
+
   return (
     <div className="landing">
       <section className="hero">
@@ -18,7 +21,22 @@ function Landing() {
         </Link>
       </section>
 
-      <div className="features-columns">
+      <div className="mobile-toggle">
+        <button
+          className={`mobile-toggle-btn mobile-toggle-btn--interview${activeTab === 'interview' ? ' active' : ''}`}
+          onClick={() => setActiveTab('interview')}
+        >
+          Interview Me
+        </button>
+        <button
+          className={`mobile-toggle-btn mobile-toggle-btn--pipeline${activeTab === 'pipeline' ? ' active' : ''}`}
+          onClick={() => setActiveTab('pipeline')}
+        >
+          Watch Them Build
+        </button>
+      </div>
+
+      <div className="features-columns" data-active-tab={activeTab}>
         {/* Interview Column */}
         <div className="feature-col feature-col--interview">
           <div className="col-header">

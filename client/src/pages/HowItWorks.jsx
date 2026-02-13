@@ -1,8 +1,11 @@
+import { useState } from 'react'
 import './HowItWorks.css'
 
 function HowItWorks() {
+  const [activeTab, setActiveTab] = useState('interview')
+
   return (
-    <div className="how-it-works">
+    <div className="how-it-works" data-active-tab={activeTab}>
       {/* Header — full width */}
       <div className="hiw-header">
         <h1>How This Was Made</h1>
@@ -10,6 +13,21 @@ function HowItWorks() {
           This site has two features &mdash; both built entirely by directing AI agents,
           not by writing code line by line. Below is a transparent, side-by-side breakdown of each.
         </p>
+      </div>
+
+      <div className="mobile-toggle hiw-mobile-toggle">
+        <button
+          className={`mobile-toggle-btn mobile-toggle-btn--interview${activeTab === 'interview' ? ' active' : ''}`}
+          onClick={() => setActiveTab('interview')}
+        >
+          Interview Me
+        </button>
+        <button
+          className={`mobile-toggle-btn mobile-toggle-btn--pipeline${activeTab === 'pipeline' ? ' active' : ''}`}
+          onClick={() => setActiveTab('pipeline')}
+        >
+          Watch Them Build
+        </button>
       </div>
 
       {/* Column Headers */}

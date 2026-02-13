@@ -345,6 +345,11 @@
   font-style: italic;
 }
 
+/* Mobile toggle bar — hidden on desktop */
+.mobile-toggle {
+  display: none;
+}
+
 /* Mobile */
 @media (max-width: 768px) {
   .landing {
@@ -361,5 +366,49 @@
 
   .about-card {
     padding: 24px;
+  }
+
+  /* Mobile toggle bar */
+  .mobile-toggle {
+    display: flex;
+    gap: 4px;
+    padding: 4px;
+    background: var(--bg-secondary);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    margin-bottom: 24px;
+  }
+
+  .mobile-toggle-btn {
+    flex: 1;
+    padding: 10px 12px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 14px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .mobile-toggle-btn--interview.active {
+    background: var(--accent-blue);
+    color: white;
+  }
+
+  .mobile-toggle-btn--pipeline.active {
+    background: var(--accent-purple);
+    color: white;
+  }
+
+  /* Column hiding */
+  .features-columns[data-active-tab="interview"] .feature-col--pipeline {
+    display: none;
+  }
+
+  .features-columns[data-active-tab="pipeline"] .feature-col--interview {
+    display: none;
   }
 }

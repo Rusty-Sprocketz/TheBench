@@ -442,17 +442,58 @@
 }
 
 @media (max-width: 768px) {
+  /* Keep tabs horizontal, but compact */
   .agent-tabs {
-    flex-direction: column;
+    gap: 2px;
+    padding: 3px;
+    margin-bottom: 8px;
+  }
+
+  .agent-tab {
+    padding: 8px 6px;
+    gap: 4px;
+    font-size: 11px;
+  }
+
+  .tab-indicator {
+    width: 6px;
+    height: 6px;
+  }
+
+  .tab-name {
+    font-size: 11px;
+  }
+
+  .tab-verdict {
+    font-size: 9px;
+    padding: 1px 4px;
+  }
+
+  /* Compact agent header */
+  .agent-header {
+    padding: 8px 12px;
+    margin-bottom: 8px;
+  }
+
+  .agent-header-desc {
+    display: none;
+  }
+
+  /* Compact demo banner */
+  .demo-banner {
+    padding: 6px 12px;
+    margin-bottom: 8px;
+    font-size: 12px;
+  }
+
+  .demo-banner-btn {
+    padding: 4px 10px;
+    font-size: 11px;
   }
 
   .agent-header-meta {
     flex-direction: column;
     gap: 2px;
-  }
-
-  .tab-name {
-    font-size: 12px;
   }
 
   .summary-agents {

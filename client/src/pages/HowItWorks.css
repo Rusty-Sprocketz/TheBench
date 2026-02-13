@@ -421,6 +421,11 @@
   margin-top: 24px !important;
 }
 
+/* Mobile toggle — hidden on desktop */
+.hiw-mobile-toggle {
+  display: none;
+}
+
 /* Mobile responsive */
 @media (max-width: 768px) {
   .how-it-works {
@@ -459,5 +464,57 @@
 
   .note-card {
     padding: 24px;
+  }
+
+  /* Mobile toggle bar */
+  .hiw-mobile-toggle {
+    display: flex;
+    gap: 4px;
+    padding: 4px;
+    background: var(--bg-secondary);
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    margin-bottom: 24px;
+  }
+
+  .hiw-mobile-toggle .mobile-toggle-btn {
+    flex: 1;
+    padding: 10px 12px;
+    border: none;
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text-muted);
+    font-size: 14px;
+    font-weight: 600;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.15s ease;
+  }
+
+  .hiw-mobile-toggle .mobile-toggle-btn--interview.active {
+    background: var(--accent-blue);
+    color: white;
+  }
+
+  .hiw-mobile-toggle .mobile-toggle-btn--pipeline.active {
+    background: var(--accent-purple);
+    color: white;
+  }
+
+  /* Column and header hiding */
+  .how-it-works[data-active-tab="interview"] .hiw-col--pipeline {
+    display: none;
+  }
+
+  .how-it-works[data-active-tab="interview"] .hiw-col-header--pipeline {
+    display: none;
+  }
+
+  .how-it-works[data-active-tab="pipeline"] .hiw-col--interview {
+    display: none;
+  }
+
+  .how-it-works[data-active-tab="pipeline"] .hiw-col-header--interview {
+    display: none;
   }
 }

@@ -124,6 +124,7 @@
 .pipeline-stage.builder .pipeline-dot { border-color: #22c55e; }
 .pipeline-stage.reviewer .pipeline-dot { border-color: #f59e0b; }
 .pipeline-stage.tester .pipeline-dot { border-color: var(--accent-purple); }
+.pipeline-stage.fixer .pipeline-dot { border-color: #f97316; }
 .pipeline-stage.deployer .pipeline-dot { border-color: #ef4444; }
 
 .pipeline-card {
@@ -148,6 +149,7 @@
 .pipeline-stage.builder .pipeline-card::before { background: #22c55e; }
 .pipeline-stage.reviewer .pipeline-card::before { background: #f59e0b; }
 .pipeline-stage.tester .pipeline-card::before { background: var(--accent-purple); }
+.pipeline-stage.fixer .pipeline-card::before { background: #f97316; }
 .pipeline-stage.deployer .pipeline-card::before { background: #ef4444; }
 
 .pipeline-card h3 {

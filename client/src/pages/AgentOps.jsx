@@ -17,7 +17,7 @@ function AgentOps() {
       <section className="agentops-section">
         <h2>The Agentic Pipeline Explained</h2>
         <p className="agentops-section-note">
-          Every feature request flows through the same five-stage agentic pipeline. Each stage has a defined role,
+          Every feature request flows through the same six-stage agentic pipeline. Each stage has a defined role,
           bounded output, and a human override point where I intervene when needed.
         </p>
 
@@ -118,10 +118,30 @@ src/db/migrations/001.sql ✓ 18 lines`}</div>
             </div>
           </div>
 
+          <div className="pipeline-stage fixer">
+            <div className="pipeline-dot"></div>
+            <div className="pipeline-card">
+              <h3>Stage 5: Bug Fixer</h3>
+              <p className="pipeline-role">
+                Receives failing tests from the Tester (or a failed smoke test post-deploy) and patches
+                the code. Only touches files that need changes &mdash; preserves the overall design.
+              </p>
+              <div className="pipeline-output">{`// Output: Fixed files
+✓ Fixed api/generate.js — wrong response extraction
+✓ Fixed app.js — mismatched field names
+2 files patched, re-testing...`}</div>
+              <div className="pipeline-override">
+                <div className="pipeline-override-label">Human Override Point</div>
+                I check that fixes address root causes, not symptoms. Agents tend to patch
+                around bugs rather than fixing the underlying logic.
+              </div>
+            </div>
+          </div>
+
           <div className="pipeline-stage deployer">
             <div className="pipeline-dot"></div>
             <div className="pipeline-card">
-              <h3>Stage 5: Deployer</h3>
+              <h3>Stage 6: Deployer</h3>
               <p className="pipeline-role">
                 Packages the feature, updates configuration, and prepares the deployment.
                 Handles environment variables, build steps, and rollback plans.

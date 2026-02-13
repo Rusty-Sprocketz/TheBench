@@ -599,14 +599,25 @@ async function handleDeployer(req, res) {
 
   const allFiles = { ...files, 'index.html': injectedHtml, 'vercel.json': VERIFIED_VERCEL_JSON };
 
-  // Step 1: Create project
+  // Step 1: Create project (or reuse if it already exists from a previous failed attempt)
+  let project;
   const projRes = await fetch(`${VERCEL_API}/v9/projects?teamId=${teamId}`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name: projectName, framework: null }),
+    body: JSON.stringify({ name: projectName, framework: null, buildCommand: '', outputDirectory: '.' }),
   });
-  if (!projRes.ok) throw new Error(`Failed to create project: ${projRes.status} ${await projRes.text()}`);
-  const project = await projRes.json();
+  if (projRes.status === 409) {
+    // Project already exists (e.g. retry after failed deploy) — fetch it
+    const existRes = await fetch(`${VERCEL_API}/v9/projects/${projectName}?teamId=${teamId}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!existRes.ok) throw new Error(`Failed to fetch existing project: ${existRes.status}`);
+    project = await existRes.json();
+  } else if (!projRes.ok) {
+    throw new Error(`Failed to create project: ${projRes.status} ${await projRes.text()}`);
+  } else {
+    project = await projRes.json();
+  }
 
   // Step 2: Disable Deployment Protection so the app is publicly accessible
   await fetch(`${VERCEL_API}/v9/projects/${project.id}?teamId=${teamId}`, {
@@ -633,7 +644,7 @@ async function handleDeployer(req, res) {
   const depRes = await fetch(`${VERCEL_API}/v13/deployments?teamId=${teamId}`, {
     method: 'POST',
     headers: { Authorization: `Bearer ${token}`, 'Content-Type': 'application/json' },
-    body: JSON.stringify({ name: projectName, files: fileEntries, projectSettings: { framework: null }, target: 'production' }),
+    body: JSON.stringify({ name: projectName, files: fileEntries, projectSettings: { framework: null, buildCommand: '', outputDirectory: '.' }, target: 'production' }),
   });
   if (!depRes.ok) throw new Error(`Failed to deploy: ${depRes.status} ${await depRes.text()}`);
   const deployment = await depRes.json();

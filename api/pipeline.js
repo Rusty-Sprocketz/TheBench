@@ -631,62 +631,78 @@ async function handleDeployer(req, res) {
       const finalUrl = `https://${aliasUrl}`;
 
       // Step 7: Smoke test — hit the app's API to verify the action button works
+      // Uses retry logic to handle Vercel alias propagation delays (404s on fresh deploys)
       let smokeTest = { status: 'skipped' };
       if (spec?.apiContract) {
-        try {
-          // Build a test payload from the spec's requestBody
-          const testPayload = {};
-          const reqBody = spec.apiContract.requestBody || {};
-          for (const [key, type] of Object.entries(reqBody)) {
-            if (type === 'string' || type.includes('string')) testPayload[key] = 'hello world test';
-            else if (type === 'number' || type.includes('number')) testPayload[key] = 42;
-            else testPayload[key] = 'test';
-          }
+        const testPayload = {};
+        const reqBody = spec.apiContract.requestBody || {};
+        for (const [key, type] of Object.entries(reqBody)) {
+          if (type === 'string' || type.includes('string')) testPayload[key] = 'hello world test';
+          else if (type === 'number' || type.includes('number')) testPayload[key] = 42;
+          else testPayload[key] = 'test';
+        }
 
-          // Wait a moment for the alias to propagate
-          await new Promise(r => setTimeout(r, 3000));
+        const SMOKE_RETRIES = 3;
+        const SMOKE_DELAY_MS = [5000, 4000, 3000]; // initial wait + retry delays
 
-          const smokeRes = await fetch(`${finalUrl}/api/generate`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(testPayload),
-          });
+        for (let attempt = 0; attempt < SMOKE_RETRIES; attempt++) {
+          await new Promise(r => setTimeout(r, SMOKE_DELAY_MS[attempt]));
 
-          const smokeBody = await smokeRes.text();
-          let smokeJson;
-          try { smokeJson = JSON.parse(smokeBody); } catch { smokeJson = null; }
+          try {
+            const smokeRes = await fetch(`${finalUrl}/api/generate`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(testPayload),
+            });
 
-          if (smokeRes.ok && smokeJson) {
-            // Verify expected response fields exist and are non-empty
-            const expectedFields = Object.keys(spec.apiContract?.responseBody || {});
-            const missingFields = expectedFields.filter(f => !(f in smokeJson));
-            const emptyFields = expectedFields.filter(f =>
-              f in smokeJson && (smokeJson[f] === null || smokeJson[f] === '')
-            );
+            const smokeBody = await smokeRes.text();
+            let smokeJson;
+            try { smokeJson = JSON.parse(smokeBody); } catch { smokeJson = null; }
 
-            if (missingFields.length > 0 || emptyFields.length > 0) {
-              smokeTest = {
-                status: 'fail', reason: 'response_validation',
-                httpStatus: smokeRes.status, missingFields, emptyFields,
-                actualFields: Object.keys(smokeJson),
-                body: smokeBody.slice(0, 500),
-              };
+            // 404 or network-level errors on early attempts are likely alias propagation — retry
+            if (smokeRes.status === 404 && attempt < SMOKE_RETRIES - 1) {
+              smokeTest = { status: 'fail', reason: 'http_error', httpStatus: 404, body: smokeBody.slice(0, 500), retryable: true };
+              continue;
+            }
+
+            if (smokeRes.ok && smokeJson) {
+              // Verify expected response fields exist and are non-empty
+              const expectedFields = Object.keys(spec.apiContract?.responseBody || {});
+              const missingFields = expectedFields.filter(f => !(f in smokeJson));
+              const emptyFields = expectedFields.filter(f =>
+                f in smokeJson && (smokeJson[f] === null || smokeJson[f] === '')
+              );
+
+              if (missingFields.length > 0 || emptyFields.length > 0) {
+                smokeTest = {
+                  status: 'fail', reason: 'response_validation',
+                  httpStatus: smokeRes.status, missingFields, emptyFields,
+                  actualFields: Object.keys(smokeJson),
+                  body: smokeBody.slice(0, 500),
+                };
+              } else {
+                smokeTest = { status: 'pass', httpStatus: smokeRes.status, response: smokeJson };
+              }
             } else {
-              smokeTest = { status: 'pass', httpStatus: smokeRes.status, response: smokeJson };
+              smokeTest = { status: 'fail', reason: 'http_error', httpStatus: smokeRes.status, body: smokeBody.slice(0, 500) };
             }
-          } else {
-            smokeTest = { status: 'fail', reason: 'http_error', httpStatus: smokeRes.status, body: smokeBody.slice(0, 500) };
-          }
 
-          // Also verify the HTML page loads
-          if (smokeTest.status === 'pass') {
-            const pageRes = await fetch(finalUrl);
-            if (!pageRes.ok) {
-              smokeTest = { status: 'fail', reason: 'page_load', httpStatus: pageRes.status };
+            // Also verify the HTML page loads
+            if (smokeTest.status === 'pass') {
+              const pageRes = await fetch(finalUrl);
+              if (!pageRes.ok) {
+                smokeTest = { status: 'fail', reason: 'page_load', httpStatus: pageRes.status };
+              }
             }
+
+            break; // Got a definitive result (pass or real failure), stop retrying
+          } catch (err) {
+            if (attempt < SMOKE_RETRIES - 1) {
+              smokeTest = { status: 'fail', reason: 'network_error', error: err.message, retryable: true };
+              continue;
+            }
+            smokeTest = { status: 'fail', reason: 'network_error', error: err.message };
           }
-        } catch (err) {
-          smokeTest = { status: 'fail', reason: 'network_error', error: err.message };
         }
       }
 

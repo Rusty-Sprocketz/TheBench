@@ -39,7 +39,16 @@ function getStageSummary(name, stage) {
         return `Generated ${stage.output.fileCount || '?'} files`;
       case 'reviewer': {
         const r = stage.output.review;
-        return r ? `${r.overallVerdict?.toUpperCase()} — Score: ${r.score}/10` : 'Review complete';
+        if (!r) return 'Review complete';
+        const items = r.items || [];
+        const passes = items.filter(i => i.status === 'pass').length;
+        const warns = items.filter(i => i.status === 'warning').length;
+        const fails = items.filter(i => i.status === 'fail').length;
+        const parts = [`${r.overallVerdict?.toUpperCase()}`];
+        if (passes) parts.push(`${passes} passed`);
+        if (warns) parts.push(`${warns} warnings`);
+        if (fails) parts.push(`${fails} failed`);
+        return parts.join(' — ');
       }
       case 'tester': {
         const t = stage.output.tests;
@@ -47,7 +56,7 @@ function getStageSummary(name, stage) {
       }
       case 'fixer':
         if (stage.output.skipped) return 'All tests passed — no fixes needed';
-        return `Fixed ${stage.output.fixedCount || '?'} files`;
+        return `Fixed ${stage.output.fixedCount || '?'} file${stage.output.fixedCount === 1 ? '' : 's'}`;
       case 'deployer': {
         const smoke = stage.output.smokeTest;
         if (smoke?.status === 'pass') return 'Live! Smoke test passed.';
@@ -164,6 +173,25 @@ function PipelineStage({ name, stage, onRetry }) {
             </div>
             {stage.output.tests.testerNotes && (
               <p className="pipeline-live-stage__note">{stage.output.tests.testerNotes}</p>
+            )}
+          </details>
+        )}
+
+        {stage.status === 'complete' && name === 'fixer' && stage.output && !stage.output.skipped && (
+          <details className="pipeline-live-stage__details">
+            <summary>View Fixes</summary>
+            {stage.output.fixNotes && (
+              <p className="pipeline-live-stage__note">{stage.output.fixNotes}</p>
+            )}
+            {stage.output.files && (
+              <div className="pipeline-live-stage__fix-files">
+                {Object.keys(stage.output.files).map((file, i) => (
+                  <div key={i} className="fix-file-item">
+                    <span className="fix-file-item__icon">&#9998;</span>
+                    <span className="fix-file-item__name">{file}</span>
+                  </div>
+                ))}
+              </div>
             )}
           </details>
         )}

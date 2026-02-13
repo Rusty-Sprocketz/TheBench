@@ -228,6 +228,32 @@
   color: var(--text-secondary);
 }
 
+/* Fixer file items */
+.pipeline-live-stage__fix-files {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-top: 8px;
+}
+
+.fix-file-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--text-secondary);
+}
+
+.fix-file-item__icon {
+  color: #f97316;
+  flex-shrink: 0;
+}
+
+.fix-file-item__name {
+  color: var(--text-secondary);
+}
+
 @media (max-width: 768px) {
   .pipeline-live-stage {
     padding-left: 36px;

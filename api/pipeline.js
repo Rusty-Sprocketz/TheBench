@@ -258,7 +258,6 @@ You MUST respond with ONLY valid JSON — no markdown, no explanation, no code f
 The JSON must follow this exact schema:
 {
   "overallVerdict": "pass" | "fail",
-  "score": number (1-10),
   "items": [
     {
       "file": "string — filename",

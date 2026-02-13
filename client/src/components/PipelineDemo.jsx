@@ -67,8 +67,8 @@ function PipelineDemo() {
         </div>
       )}
 
-      {/* Pipeline stages */}
-      {pipelineStatus !== 'idle' && (
+      {/* Pipeline stages (hide if preflight itself failed — nothing ran yet) */}
+      {pipelineStatus !== 'idle' && stages.preflight?.status !== 'error' && (
         <div className="pipeline-demo__stages">
           <div className="pipeline-demo__stages-line" />
           {visibleStages.map(name => (
@@ -98,11 +98,21 @@ function PipelineDemo() {
       {/* Error guidance */}
       {pipelineStatus === 'error' && (
         <div className="pipeline-demo__error-banner">
-          <p>
-            Agents are attempting to build this app live &mdash; sometimes things go wrong.
-            Try <strong>Retry Stage</strong> on the failed step. If that doesn&rsquo;t work,
-            scroll down and hit <strong>Start Over</strong> to try a fresh run.
-          </p>
+          {stages.preflight?.status === 'error' ? (
+            <p>
+              <strong>Pipeline couldn&rsquo;t start:</strong>{' '}
+              {stages.preflight.error || 'Preflight check failed.'}
+              {stages.preflight.errorDetail && (
+                <span className="pipeline-demo__error-detail"> ({stages.preflight.errorDetail})</span>
+              )}
+            </p>
+          ) : (
+            <p>
+              Agents are attempting to build this app live &mdash; sometimes things go wrong.
+              Try <strong>Retry Stage</strong> on the failed step. If that doesn&rsquo;t work,
+              hit <strong>Start Over</strong> below to try a fresh run.
+            </p>
+          )}
         </div>
       )}
 

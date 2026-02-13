@@ -181,7 +181,14 @@ CRITICAL RULES:
 1. index.html must be a complete standalone HTML file that links to styles.css and app.js
 2. index.html MUST include a "How I Was Built" panel section at the bottom with id="build-log-panel"
 3. The build log panel should have a toggle button and show placeholder divs with ids: architect-log, builder-log, reviewer-log, tester-log, deployer-log
-4. app.js must read build log data from window.__BUILD_LOG__ (a global set by an inline script injected at deploy time). Do NOT fetch build-log.json. Use: const buildLog = window.__BUILD_LOG__ || {}; Then populate the panel divs from buildLog.architect, buildLog.builder, buildLog.reviewer, buildLog.tester, buildLog.deployer.
+4. app.js must read build log data from window.__BUILD_LOG__ (a global set by an inline script injected at deploy time). Do NOT fetch build-log.json. Use: const buildLog = window.__BUILD_LOG__ || {};
+   IMPORTANT: Each buildLog section (architect, builder, reviewer, tester, deployer) is a JSON OBJECT, not a string. You MUST format them for display. Use this exact pattern for each panel div:
+   - architect-log: Show buildLog.architect.spec.title, buildLog.architect.spec.tagline, and buildLog.architect.notes. Format as readable HTML paragraphs.
+   - builder-log: Show buildLog.builder.fileCount + " files generated", list buildLog.builder.fileNames (it's an array), and buildLog.builder.notes.
+   - reviewer-log: Show buildLog.reviewer.overallVerdict, buildLog.reviewer.score, and loop through buildLog.reviewer.items array showing each item's file, status, and finding.
+   - tester-log: Show buildLog.tester.passed + "/" + buildLog.tester.totalTests + " tests passed", loop through buildLog.tester.tests array showing each test name and status.
+   - deployer-log: Show buildLog.deployer.projectName, buildLog.deployer.deployedAt, and buildLog.deployer.pipelineDuration.
+   NEVER use .textContent = someObject or .innerHTML = someObject directly. Always extract specific string/number properties or use JSON.stringify(obj, null, 2) wrapped in a <pre> tag as a fallback. If a section is missing, show "Data not available".
 5. styles.css must implement the Architect's theme (colors, fonts, layout)
 6. api/generate.js must be a valid Vercel serverless function (module.exports = async (req, res) => { ... })
 7. For "ai-micro-tool" type apps, api/generate.js should use the Gemini API via @google/generative-ai
@@ -318,6 +325,7 @@ LOGIC TESTS (most important — trace through the code carefully):
 5. For computation apps: Trace through the algorithm with the sample input "hello world". Does it produce a reasonable result? FAIL if the logic has a bug.
 6. Does error handling work? If the API call fails, does app.js show an error message instead of crashing? Does api/generate.js have try/catch and return error JSON?
 7. Does app.js read build log from window.__BUILD_LOG__ (NOT fetch build-log.json)? FAIL if it tries to fetch a file.
+8. BUILD LOG RENDERING: Does app.js format build log objects properly? Each buildLog section (architect, builder, reviewer, tester, deployer) is a nested OBJECT. Check that the code extracts specific properties (like buildLog.architect.spec.title, buildLog.builder.fileCount, buildLog.reviewer.items, etc.) rather than assigning an object directly to .textContent or .innerHTML. If any line does something like element.textContent = buildLog.architect or element.innerHTML = someObject (where someObject is not a string), FAIL — this produces "[object Object]" on screen.
 
 STRUCTURAL TESTS:
 8. Required DOM elements: input field, submit button, output area, build-log-panel
@@ -382,7 +390,8 @@ RULES:
 4. Do NOT change the overall app design, theme, or structure — only fix the bugs.
 5. Pay special attention to: mismatched API field names, incorrect fetch URLs, broken JSON parsing, incorrect Gemini API usage.
 6. Build log data comes from window.__BUILD_LOG__ (injected at deploy time). Do NOT fetch build-log.json.
-7. The fetch URL for the app's main action MUST be "/api/generate" and field names MUST match the spec's apiContract exactly.`;
+7. The fetch URL for the app's main action MUST be "/api/generate" and field names MUST match the spec's apiContract exactly.
+8. Build log sections are OBJECTS, not strings. Never assign an object directly to .textContent or .innerHTML — this produces "[object Object]". Extract specific properties (e.g. buildLog.architect.spec.title, buildLog.builder.fileCount, buildLog.reviewer.items) and format them as HTML strings.`;
 
 async function handleFixer(req, res) {
   if (!process.env.ANTHROPIC_API_KEY) return res.status(500).json({ error: 'Anthropic API key not configured' });

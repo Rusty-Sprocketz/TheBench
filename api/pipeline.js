@@ -199,7 +199,8 @@ CRITICAL RULES:
 12. The app must be fully functional and visually polished
 13. Use the EXACT color palette from the spec for CSS custom properties
 14. Include a footer link: "Built by AI agents on <a href='https://the-bench.vercel.app/agentops'>The Bench</a>"
-15. The main app feature MUST work. The fetch call in app.js must use the correct URL ("/api/generate"), send the right field names matching apiContract.requestBody, and read the correct field names from the response matching apiContract.responseBody. Double-check these match exactly.`;
+15. The main app feature MUST work. The fetch call in app.js must use the correct URL ("/api/generate"), send the right field names matching apiContract.requestBody, and read the correct field names from the response matching apiContract.responseBody. Double-check these match exactly.
+16. CRITICAL fetch error handling in app.js: After calling fetch(), you MUST check response.ok before calling response.json(). If !response.ok, read the body as text first, then try to parse it as JSON in a try/catch. Show a user-friendly error message in the output area (e.g. "Something went wrong — please try again."). NEVER call response.json() without checking response.ok first, because error responses may return HTML (not JSON) which causes "Unexpected token" crashes.`;
 
 async function handleBuilder(req, res) {
   if (!process.env.ANTHROPIC_API_KEY) return res.status(500).json({ error: 'Anthropic API key not configured' });

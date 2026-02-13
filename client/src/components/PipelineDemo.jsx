@@ -42,7 +42,7 @@ function PipelineDemo() {
         <h2>Watch the Pipeline Build a Real App</h2>
         <p className="pipeline-demo__desc">
           Five AI agents will design, build, review, test, and deploy a real application.
-          The app self-destructs after 1 hour.
+          The app self-destructs after 30 minutes.
         </p>
       </div>
 

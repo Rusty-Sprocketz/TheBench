@@ -8,7 +8,7 @@ function DeployedApp({ url, deployedAt, totalDuration, projectName, sourceFiles,
   useEffect(() => {
     if (!deployedAt) return
 
-    const expiresAt = deployedAt + 60 * 60 * 1000 // 1 hour
+    const expiresAt = deployedAt + 30 * 60 * 1000 // 30 minutes
     const interval = setInterval(() => {
       const remaining = expiresAt - Date.now()
       if (remaining <= 0) {

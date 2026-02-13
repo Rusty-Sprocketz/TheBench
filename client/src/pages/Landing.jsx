@@ -205,7 +205,7 @@ function Landing() {
                   and the deployment log.
                 </p>
                 <p>
-                  Apps self-destruct after one hour &mdash; ephemeral by design. This isn&rsquo;t
+                  Apps self-destruct after 30 minutes &mdash; ephemeral by design. This isn&rsquo;t
                   a mock. The URL is live and anyone can visit it.
                 </p>
               </div>

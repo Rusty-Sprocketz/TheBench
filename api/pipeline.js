@@ -13,7 +13,6 @@ const RATE_LIMIT_MS = 2 * 60 * 1000; // 2 minutes (reduced for testing)
 const MAX_AGE_MS = 30 * 60 * 1000; // 30 minutes
 
 const rateLimitStore = {};
-let variantIndex = 7; // Color Contrast Checker retest
 
 // ─── Helpers ───
 
@@ -221,13 +220,9 @@ async function handleArchitect(req, res) {
 
   const { seed } = req.body;
 
-  // Flatten all variants into a sequential list and cycle through them
-  const allVariants = APP_TYPES.flatMap(tg => tg.variants.map(v => ({ type: tg.type, variant: v })));
-  const pick = allVariants[variantIndex % allVariants.length];
-  variantIndex++;
-  const tg = { type: pick.type };
-  const variant = pick.variant;
-  const theme = THEMES[variantIndex % THEMES.length];
+  const tg = APP_TYPES[Math.floor(Math.random() * APP_TYPES.length)];
+  const variant = tg.variants[Math.floor(Math.random() * tg.variants.length)];
+  const theme = THEMES[Math.floor(Math.random() * THEMES.length)];
 
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
   const response = await client.messages.create({

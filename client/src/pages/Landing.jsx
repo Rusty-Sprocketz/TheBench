@@ -6,7 +6,7 @@ function Landing() {
     <div className="landing">
       <section className="hero">
         <p className="hero-tagline">You said don&rsquo;t send a CV. So I built this instead.</p>
-        <div className="hero-badge">Multi-Agent AI Interview</div>
+        <div className="hero-badge">Multi-Agent AI Interview &amp; Pipeline Demo</div>
         <h1 className="hero-title">
           Welcome to <span className="highlight">The Bench</span>
         </h1>
@@ -18,6 +18,9 @@ function Landing() {
         <div className="hero-actions">
           <Link to="/interview" className="btn btn-primary">
             Start the Interview
+          </Link>
+          <Link to="/agentops" className="btn btn-accent">
+            See AgenticOps in Action
           </Link>
           <Link to="/how-it-works" className="btn btn-secondary">
             How This Was Made

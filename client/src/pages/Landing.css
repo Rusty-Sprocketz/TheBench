@@ -88,6 +88,19 @@
   box-shadow: 0 4px 20px rgba(74, 125, 255, 0.3);
 }
 
+.btn-accent {
+  background: rgba(139, 92, 246, 0.15);
+  color: var(--accent-purple, #8b5cf6);
+  border: 1px solid rgba(139, 92, 246, 0.3);
+}
+
+.btn-accent:hover {
+  background: rgba(139, 92, 246, 0.25);
+  border-color: rgba(139, 92, 246, 0.5);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 20px rgba(139, 92, 246, 0.2);
+}
+
 .btn-secondary {
   background: var(--bg-card);
   color: var(--text-primary);

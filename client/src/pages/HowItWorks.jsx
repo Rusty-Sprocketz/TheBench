@@ -7,6 +7,7 @@ function HowItWorks() {
         <h1>How This Was Made</h1>
         <p className="hiw-intro">
           This app was built by directing multiple AI agents &mdash; not by writing code line by line.
+          It has two main features: a multi-agent AI interview panel and a live AgenticOps pipeline demo.
           Below is a transparent breakdown of the architecture, the agents involved, the system prompts
           used, and the decisions I made as the orchestrator.
         </p>
@@ -67,6 +68,105 @@ function HowItWorks() {
             <p>Vercel (frontend + serverless API functions)</p>
           </div>
         </div>
+      </section>
+
+      {/* AgenticOps Pipeline Demo */}
+      <section className="hiw-section">
+        <h2>The AgenticOps Pipeline Demo</h2>
+        <p className="section-note">
+          The second feature of this app is a live pipeline demo. Five AI agents design, build, review,
+          test, and deploy a real web application to production &mdash; in under two minutes. The deployed
+          app self-destructs after one hour.
+        </p>
+
+        <div className="architecture-diagram">
+          <div className="arch-node orchestrator">
+            <div className="arch-label">Automated Pipeline</div>
+            <div className="arch-detail">5 Stages, 3 AI Providers</div>
+            <div className="arch-desc">Each stage feeds into the next &mdash; fully automated from click to live URL</div>
+          </div>
+          <div className="arch-arrows">
+            <div className="arch-arrow architect"></div>
+            <div className="arch-arrow operator"></div>
+            <div className="arch-arrow culture"></div>
+          </div>
+          <div className="arch-agents">
+            <div className="arch-node agent architect">
+              <div className="arch-label">Architect + Builder + Fixer</div>
+              <div className="arch-detail mono">Claude</div>
+              <div className="arch-provider">Anthropic API</div>
+            </div>
+            <div className="arch-node agent operator">
+              <div className="arch-label">Reviewer</div>
+              <div className="arch-detail mono">GPT-4o</div>
+              <div className="arch-provider">OpenAI API</div>
+            </div>
+            <div className="arch-node agent culture">
+              <div className="arch-label">Tester</div>
+              <div className="arch-detail mono">Gemini Flash</div>
+              <div className="arch-provider">Google AI API</div>
+            </div>
+          </div>
+        </div>
+
+        <div className="decisions-list">
+          <div className="decision">
+            <div className="decision-number">1</div>
+            <div>
+              <h4>Architect (Claude) Designs the Spec</h4>
+              <p>
+                Picks the app type, variant, colour palette, and defines the full API contract.
+                Every subsequent stage works from this spec &mdash; different spec means a genuinely different app each run.
+              </p>
+            </div>
+          </div>
+          <div className="decision">
+            <div className="decision-number">2</div>
+            <div>
+              <h4>Builder (Claude) Generates the Code</h4>
+              <p>
+                Produces all files from the spec: frontend HTML/CSS/JS, a backend serverless function,
+                and a &ldquo;How I Was Built&rdquo; panel that embeds every agent&rsquo;s real output into the deployed app.
+              </p>
+            </div>
+          </div>
+          <div className="decision">
+            <div className="decision-number">3</div>
+            <div>
+              <h4>Reviewer (GPT-4o) Checks Quality</h4>
+              <p>
+                Reviews the code against the Architect&rsquo;s spec. Flags implementation mismatches,
+                security issues, and accessibility gaps.
+              </p>
+            </div>
+          </div>
+          <div className="decision">
+            <div className="decision-number">4</div>
+            <div>
+              <h4>Tester (Gemini Flash) Validates</h4>
+              <p>
+                Runs structural tests: DOM elements, API contract matching, error handling.
+                If tests fail, code loops back to a Fixer agent before deployment.
+              </p>
+            </div>
+          </div>
+          <div className="decision">
+            <div className="decision-number">5</div>
+            <div>
+              <h4>Deployer Ships to Production</h4>
+              <p>
+                Deploys to Vercel via API, polls until live, then runs a smoke test against the
+                app&rsquo;s API endpoint. The URL goes from 404 to 200 in real time.
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <p className="section-note" style={{ marginTop: '1.5rem' }}>
+          This pipeline was itself built using Claude Code &mdash; the same agent-directed approach
+          used for the rest of the app. The pipeline orchestration, prompt engineering, error handling,
+          and Vercel API integration were all designed and directed by me as the orchestrator.
+        </p>
       </section>
 
       {/* System Prompts */}

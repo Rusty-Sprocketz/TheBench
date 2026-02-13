@@ -6,34 +6,34 @@ function AgentOps() {
   return (
     <div className="agentops">
       <div className="agentops-header">
-        <h1>AgentOps</h1>
-        <p className="agentops-subtitle">How I Direct AI Agents to Ship Software</p>
+        <h1>AgenticOps</h1>
+        <p className="agentops-subtitle">How I Direct Agentic Pipelines to Ship Software</p>
       </div>
 
       {/* Live Pipeline Demo */}
       <PipelineDemo />
 
-      {/* Feature request */}
-      <div className="feature-request">
-        <div className="feature-request-label">Incoming Feature Request</div>
-        <div className="feature-request-input">
-          Add user authentication with OAuth and role-based access control<span className="cursor"></span>
-        </div>
-      </div>
-
       {/* Pipeline */}
       <section className="agentops-section">
-        <h2>The Agent Pipeline</h2>
+        <h2>The Agentic Pipeline Explained</h2>
         <p className="agentops-section-note">
-          Every feature request flows through the same five-stage pipeline. Each stage has a defined role,
+          Every feature request flows through the same five-stage agentic pipeline. Each stage has a defined role,
           bounded output, and a human override point where I intervene when needed.
         </p>
+
+        {/* Feature request */}
+        <div className="feature-request">
+          <div className="feature-request-label">Incoming Feature Request</div>
+          <div className="feature-request-input">
+            Add user authentication with OAuth and role-based access control<span className="cursor"></span>
+          </div>
+        </div>
 
         <div className="pipeline">
           <div className="pipeline-stage architect">
             <div className="pipeline-dot"></div>
             <div className="pipeline-card">
-              <h3>Stage 1: Architect Agent</h3>
+              <h3>Stage 1: Architect</h3>
               <p className="pipeline-role">
                 Breaks the feature into components, defines boundaries, and produces a system design
                 before any code is written.
@@ -56,7 +56,7 @@ function AgentOps() {
           <div className="pipeline-stage builder">
             <div className="pipeline-dot"></div>
             <div className="pipeline-card">
-              <h3>Stage 2: Builder Agent</h3>
+              <h3>Stage 2: Builder</h3>
               <p className="pipeline-role">
                 Writes code within the boundaries set by the Architect. Doesn&rsquo;t make design decisions
                 &mdash; implements what was specified.
@@ -77,7 +77,7 @@ src/db/migrations/001.sql ✓ 18 lines`}</div>
           <div className="pipeline-stage reviewer">
             <div className="pipeline-dot"></div>
             <div className="pipeline-card">
-              <h3>Stage 3: Reviewer Agent</h3>
+              <h3>Stage 3: Reviewer</h3>
               <p className="pipeline-role">
                 Critiques the Builder&rsquo;s output against the Architect&rsquo;s spec. Flags deviations,
                 missing edge cases, and code quality issues.
@@ -98,7 +98,7 @@ src/db/migrations/001.sql ✓ 18 lines`}</div>
           <div className="pipeline-stage tester">
             <div className="pipeline-dot"></div>
             <div className="pipeline-card">
-              <h3>Stage 4: Test Agent</h3>
+              <h3>Stage 4: Tester</h3>
               <p className="pipeline-role">
                 Generates test cases covering happy paths, edge cases, and failure modes.
                 Tests what the code <em>should</em> do, not what it <em>does</em> do.
@@ -121,7 +121,7 @@ src/db/migrations/001.sql ✓ 18 lines`}</div>
           <div className="pipeline-stage deployer">
             <div className="pipeline-dot"></div>
             <div className="pipeline-card">
-              <h3>Stage 5: Deploy Agent</h3>
+              <h3>Stage 5: Deployer</h3>
               <p className="pipeline-role">
                 Packages the feature, updates configuration, and prepares the deployment.
                 Handles environment variables, build steps, and rollback plans.

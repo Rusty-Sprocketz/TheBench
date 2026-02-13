@@ -28,7 +28,7 @@ function Nav() {
             to="/agentops"
             className={`nav-link ${location.pathname === '/agentops' ? 'active' : ''}`}
           >
-            AgentOps
+            AgenticOps
           </Link>
           <Link
             to="/how-it-works"

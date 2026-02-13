@@ -9,10 +9,11 @@ const { GoogleGenerativeAI } = require('@google/generative-ai');
 const VERCEL_API = 'https://api.vercel.com';
 const PROJECT_PREFIX = 'bench-demo-';
 const MAX_ACTIVE_PROJECTS = 3;
-const RATE_LIMIT_MS = 30 * 60 * 1000; // 30 minutes
+const RATE_LIMIT_MS = 2 * 60 * 1000; // 2 minutes (reduced for testing)
 const MAX_AGE_MS = 60 * 60 * 1000; // 1 hour
 
 const rateLimitStore = {};
+let variantIndex = 0; // Sequential cycling through all variants for testing
 
 // ─── Helpers ───
 
@@ -219,9 +220,14 @@ async function handleArchitect(req, res) {
   if (!process.env.ANTHROPIC_API_KEY) return res.status(500).json({ error: 'Anthropic API key not configured' });
 
   const { seed } = req.body;
-  const tg = APP_TYPES[Math.floor(Math.random() * APP_TYPES.length)];
-  const variant = tg.variants[Math.floor(Math.random() * tg.variants.length)];
-  const theme = THEMES[Math.floor(Math.random() * THEMES.length)];
+
+  // Flatten all variants into a sequential list and cycle through them
+  const allVariants = APP_TYPES.flatMap(tg => tg.variants.map(v => ({ type: tg.type, variant: v })));
+  const pick = allVariants[variantIndex % allVariants.length];
+  variantIndex++;
+  const tg = { type: pick.type };
+  const variant = pick.variant;
+  const theme = THEMES[variantIndex % THEMES.length];
 
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
   const response = await client.messages.create({

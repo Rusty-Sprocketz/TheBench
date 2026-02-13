@@ -308,7 +308,7 @@ async function handleBuilder(req, res) {
 
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
   const response = await client.messages.create({
-    model: 'claude-sonnet-4-5-20250929', max_tokens: 8192, system: BUILDER_SYSTEM,
+    model: 'claude-sonnet-4-5-20250929', max_tokens: 16384, system: BUILDER_SYSTEM,
     messages: [{ role: 'user', content: `Here is the Architect's spec. Generate all files for this app:
 
 ${JSON.stringify(spec, null, 2)}
@@ -541,7 +541,7 @@ async function handleFixer(req, res) {
 
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
   const response = await client.messages.create({
-    model: 'claude-sonnet-4-5-20250929', max_tokens: 8192, system: FIXER_SYSTEM,
+    model: 'claude-sonnet-4-5-20250929', max_tokens: 16384, system: FIXER_SYSTEM,
     messages: [{ role: 'user', content: `Fix the issues in this app.
 
 ARCHITECT SPEC:

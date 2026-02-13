@@ -119,7 +119,7 @@ export function usePipeline() {
     }
   }, [updateStage]);
 
-  const launch = useCallback(async () => {
+  const launch = useCallback(async (options = {}) => {
     cancelledRef.current = false;
     const pipelineStart = performance.now();
 
@@ -138,8 +138,18 @@ export function usePipeline() {
     pipelineDataRef.current = { spec: null, files: null };
 
     try {
-      // Stage 0: Preflight
-      const preflightResult = await runStage('preflight', () => api.preflight());
+      // Stage 0: Preflight — skip if restarting with an existing project name
+      let preflightResult;
+      if (options.reuseProjectName) {
+        preflightResult = {
+          projectName: options.reuseProjectName,
+          targetUrl: `https://${options.reuseProjectName}.vercel.app`,
+          activeProjects: 0,
+        };
+        updateStage('preflight', { status: 'complete', output: preflightResult, duration: 'reused' });
+      } else {
+        preflightResult = await runStage('preflight', () => api.preflight());
+      }
       setProjectName(preflightResult.projectName);
       setTargetUrl(preflightResult.targetUrl);
 
@@ -290,8 +300,14 @@ export function usePipeline() {
     setSourceFiles(null);
     setPipelineStatus('idle');
 
-    // Relaunch
-    setTimeout(() => launch(), 100);
+    // Generate a new project name locally to avoid hitting the rate-limited preflight
+    const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
+    let newId = '';
+    for (let i = 0; i < 5; i++) newId += chars[Math.floor(Math.random() * chars.length)];
+    const newName = `bench-demo-${newId}`;
+
+    // Relaunch, skipping preflight since we already passed rate limits on the first run
+    setTimeout(() => launch({ reuseProjectName: newName }), 100);
   }, [launch]);
 
   const clear = useCallback(async () => {
@@ -321,43 +337,117 @@ export function usePipeline() {
   }, []);
 
   const retryStage = useCallback(async (stageName) => {
-    if (!pipelineDataRef.current.spec) return;
+    if (!pipelineDataRef.current.spec && stageName !== 'architect') return;
     setPipelineStatus('running');
+    const pipelineStart = performance.now();
 
-    const spec = pipelineDataRef.current.spec;
-    const files = pipelineDataRef.current.files;
+    let currentFiles = pipelineDataRef.current.files;
 
     try {
-      let result;
-      switch (stageName) {
-        case 'architect':
-          result = await runStage('architect', () => api.runArchitect(Math.random().toString(36).slice(2)));
-          pipelineDataRef.current.spec = result.spec;
-          break;
-        case 'builder':
-          result = await runStage('builder', () => api.runBuilder(spec));
-          pipelineDataRef.current.files = result.files;
-          setSourceFiles(result.files);
-          break;
-        case 'reviewer':
-          await runStage('reviewer', () => api.runReviewer(spec, files));
-          break;
-        case 'tester':
-          await runStage('tester', () => api.runTester(spec, files));
-          break;
-        case 'deployer':
-          await runStage('deployer', () => api.runDeployer(projectName, files, spec, {}));
-          break;
-        default:
-          break;
+      // Determine which stages to run from the retry point forward
+      const stageOrder = ['architect', 'builder', 'reviewer', 'tester', 'fixer', 'deployer'];
+      const startIdx = stageOrder.indexOf(stageName);
+      if (startIdx === -1) return;
+
+      // Reset all stages from the retry point forward
+      setStages(prev => {
+        const updated = { ...prev };
+        for (let i = startIdx; i < stageOrder.length; i++) {
+          updated[stageOrder[i]] = { ...INITIAL_STAGE(), label: STAGE_LABELS[stageOrder[i]] };
+        }
+        return updated;
+      });
+
+      let builderResult = { files: currentFiles, fileCount: currentFiles ? Object.keys(currentFiles).length : 0, builderNotes: '' };
+      let testerResult = null;
+      let fixerResult = null;
+      let reviewerResult = null;
+
+      for (let i = startIdx; i < stageOrder.length; i++) {
+        if (cancelledRef.current) throw new Error('Pipeline cancelled');
+        const stage = stageOrder[i];
+
+        if (stage === 'architect') {
+          const architectResult = await runStage('architect', () => api.runArchitect(Math.random().toString(36).slice(2)));
+          pipelineDataRef.current.spec = architectResult.spec;
+        } else if (stage === 'builder') {
+          builderResult = await runStage('builder', () => api.runBuilder(pipelineDataRef.current.spec));
+          pipelineDataRef.current.files = builderResult.files;
+          currentFiles = builderResult.files;
+          setSourceFiles(builderResult.files);
+        } else if (stage === 'reviewer') {
+          reviewerResult = await runStage('reviewer', () =>
+            api.runReviewer(pipelineDataRef.current.spec, pipelineDataRef.current.files)
+          );
+        } else if (stage === 'tester') {
+          testerResult = await runStage('tester', () =>
+            api.runTester(pipelineDataRef.current.spec, pipelineDataRef.current.files)
+          );
+          if (testerResult.tests && testerResult.tests.failed > 0) {
+            fixerResult = await runStage('fixer', () =>
+              api.runFixer(pipelineDataRef.current.spec, pipelineDataRef.current.files, testerResult.tests)
+            );
+            pipelineDataRef.current.files = fixerResult.files;
+            currentFiles = fixerResult.files;
+            setSourceFiles(fixerResult.files);
+            testerResult = await runStage('tester', () =>
+              api.runTester(pipelineDataRef.current.spec, fixerResult.files)
+            );
+          } else {
+            updateStage('fixer', { status: 'complete', output: { skipped: true, fixedCount: 0 }, duration: 'skipped' });
+          }
+          // Fixer handled inline with tester — skip its index
+          if (stageOrder[i + 1] === 'fixer') i++;
+        } else if (stage === 'fixer') {
+          // Reached directly (not via tester) — skip
+          updateStage('fixer', { status: 'complete', output: { skipped: true, fixedCount: 0 }, duration: 'skipped' });
+        } else if (stage === 'deployer') {
+          currentFiles = pipelineDataRef.current.files;
+          let deployAttempts = 0;
+          const maxDeployAttempts = 2;
+          let deployResult;
+
+          while (deployAttempts < maxDeployAttempts) {
+            deployAttempts++;
+            const buildLog = {
+              architect: { spec: pipelineDataRef.current.spec, notes: pipelineDataRef.current.spec.architectNotes },
+              builder: { fileCount: Object.keys(currentFiles).length, notes: builderResult.builderNotes || '', fileNames: Object.keys(currentFiles) },
+              reviewer: reviewerResult?.review || {},
+              tester: testerResult?.tests || {},
+              fixer: fixerResult ? { fixNotes: fixerResult.fixNotes, fixedCount: fixerResult.fixedCount } : { skipped: true },
+              deployer: { projectName, deployedAt: new Date().toISOString(), pipelineDuration: `${((performance.now() - pipelineStart) / 1000).toFixed(1)}s` },
+              meta: { builtBy: 'The Bench — AI Agent Pipeline Demo', url: 'https://the-bench.vercel.app/agentops' },
+            };
+            deployResult = await runStage('deployer', () =>
+              api.runDeployer(projectName, currentFiles, pipelineDataRef.current.spec, buildLog)
+            );
+            if (deployResult.smokeTest?.status === 'fail' && deployAttempts < maxDeployAttempts) {
+              fixerResult = await runStage('fixer', () =>
+                api.runFixer(pipelineDataRef.current.spec, currentFiles, null, deployResult.smokeTest)
+              );
+              currentFiles = fixerResult.files;
+              pipelineDataRef.current.files = fixerResult.files;
+              setSourceFiles(fixerResult.files);
+              try { await api.cleanup(projectName); } catch { /* ignore */ }
+              updateStage('deployer', { status: 'pending', output: null, error: null, duration: null });
+              continue;
+            }
+            break;
+          }
+
+          setDeployedUrl(deployResult.url);
+          setDeployedAt(Date.now());
+          setProjectId(deployResult.projectId);
+          setTotalDuration(`${((performance.now() - pipelineStart) / 1000).toFixed(1)}s`);
+          setPipelineStatus('deployed');
+          return;
+        }
       }
-      // Check if all stages are complete
-      // This simplified retry just retries one stage — user can continue manually
-      setPipelineStatus('error'); // Stay in error so user can proceed
+      setPipelineStatus('deployed');
     } catch {
       setPipelineStatus('error');
     }
-  }, [runStage, projectName]);
+  }, [runStage, updateStage, projectName]);
 
   const cleanupDeployment = useCallback(async () => {
     if (projectName) {

@@ -114,6 +114,19 @@ function runContractTests(spec, files) {
       : 'app.js does NOT check response.ok — error responses (HTML) will crash JSON parsing',
   });
 
+  // Check vercel.json uses rewrites (not legacy routes which break serverless functions)
+  const vercelJson = files['vercel.json'] || '';
+  const usesRoutes = vercelJson.includes('"routes"');
+  const usesRewrites = vercelJson.includes('"rewrites"');
+  tests.push({
+    name: 'vercel.json uses rewrites (not legacy routes)',
+    category: 'contract',
+    status: (!usesRoutes && usesRewrites) ? 'pass' : usesRoutes ? 'fail' : 'pass',
+    detail: usesRoutes
+      ? 'vercel.json uses legacy "routes" format which can prevent serverless functions from working — must use "rewrites" instead'
+      : 'vercel.json uses modern "rewrites" format',
+  });
+
   return tests;
 }
 
@@ -570,7 +583,15 @@ async function handleDeployer(req, res) {
       ? html.replace('</body>', `${buildLogScript}</body>`)
       : html + buildLogScript;
 
-  const allFiles = { ...files, 'index.html': injectedHtml };
+  // Override vercel.json with a known-good config — Builder-generated configs often use
+  // legacy "routes" format which prevents Vercel from recognizing api/*.js as serverless functions
+  const VERIFIED_VERCEL_JSON = JSON.stringify({
+    rewrites: [
+      { source: "/((?!api/).*)", destination: "/index.html" }
+    ]
+  });
+
+  const allFiles = { ...files, 'index.html': injectedHtml, 'vercel.json': VERIFIED_VERCEL_JSON };
 
   // Step 1: Create project
   const projRes = await fetch(`${VERCEL_API}/v9/projects?teamId=${teamId}`, {

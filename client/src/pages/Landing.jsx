@@ -91,7 +91,7 @@ function Landing() {
             </p>
             <p>
               That background is exactly why AI-agent development makes sense as my
-              next step. <strong>Directing an AI agent well requires the same instinct I&rsquo;ve
+              next step. <strong style={{ color: '#ffffff' }}>Directing an AI agent well requires the same instinct I&rsquo;ve
               been sharpening for years: empathy for the end user, clarity about the
               outcome, and the discipline to design a workflow instead of just
               executing tasks.</strong> The bridge between &ldquo;designing better employee

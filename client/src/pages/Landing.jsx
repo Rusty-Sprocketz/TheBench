@@ -74,7 +74,7 @@ function Landing() {
               I&rsquo;ve spent the last decade working alongside Ross and Pascoe &mdash;
               first at Olikka, the boutique Melbourne systems integrator they took a
               leap on me to join in 2014, and then at Accenture after the acquisition
-              in 2020. Across 25+ engagements I led Workplace-Strategy and Transformation
+              in 2020. Across many engagements I led Workplace-Strategy and Transformation
               programs specialising in M365, Modern Workplace, End-User Experience,
               and Endpoint Management. Most recently at Arinco, I led the delivery
               of a global Intune Endpoint Management solution for PEXA&rsquo;s 2,000 staff
@@ -91,10 +91,10 @@ function Landing() {
             </p>
             <p>
               That background is exactly why AI-agent development makes sense as my
-              next step. Directing an AI agent well requires the same instinct I&rsquo;ve
+              next step. <strong>Directing an AI agent well requires the same instinct I&rsquo;ve
               been sharpening for years: empathy for the end user, clarity about the
               outcome, and the discipline to design a workflow instead of just
-              executing tasks. The bridge between &ldquo;designing better employee
+              executing tasks.</strong> The bridge between &ldquo;designing better employee
               experiences&rdquo; and &ldquo;directing AI agents to ship product&rdquo;
               is shorter than it looks &mdash; both demand someone who thinks in systems,
               communicates intent precisely, and cares about the quality of what gets

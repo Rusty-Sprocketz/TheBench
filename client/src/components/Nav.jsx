@@ -20,19 +20,19 @@ function Nav() {
           </Link>
           <Link
             to="/interview"
-            className={`nav-link ${location.pathname === '/interview' ? 'active' : ''}`}
+            className={`nav-link nav-link--interview ${location.pathname === '/interview' ? 'active' : ''}`}
           >
             Interview
           </Link>
           <Link
             to="/agentops"
-            className={`nav-link ${location.pathname === '/agentops' ? 'active' : ''}`}
+            className={`nav-link nav-link--agentops ${location.pathname === '/agentops' ? 'active' : ''}`}
           >
             AgenticOps
           </Link>
           <Link
             to="/how-it-works"
-            className={`nav-link ${location.pathname === '/how-it-works' ? 'active' : ''}`}
+            className={`nav-link nav-link--how ${location.pathname === '/how-it-works' ? 'active' : ''}`}
           >
             How It Works
           </Link>

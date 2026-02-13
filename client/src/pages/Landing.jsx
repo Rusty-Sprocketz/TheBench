@@ -13,8 +13,8 @@ function Landing() {
         <p className="hero-bold-subtitle">
           Two ways to prove I can direct AI agents &mdash; interview me, or watch them build.
         </p>
-        <Link to="/how-it-works" className="hero-link">
-          How This Was Made &rarr;
+        <Link to="/how-it-works" className="btn btn-green">
+          How This Was Made
         </Link>
       </section>
 

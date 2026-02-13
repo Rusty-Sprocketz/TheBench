@@ -191,8 +191,23 @@ CRITICAL RULES:
    NEVER use .textContent = someObject or .innerHTML = someObject directly. Always extract specific string/number properties or use JSON.stringify(obj, null, 2) wrapped in a <pre> tag as a fallback. If a section is missing, show "Data not available".
 5. styles.css must implement the Architect's theme (colors, fonts, layout)
 6. api/generate.js must be a valid Vercel serverless function (module.exports = async (req, res) => { ... })
-7. For "ai-micro-tool" type apps, api/generate.js should use the Gemini API via @google/generative-ai
-8. For "text-transformer" and "utility-calculator" types, api/generate.js should do real computation (no AI needed)
+7. For "ai-micro-tool" type apps, api/generate.js MUST use this exact Gemini pattern:
+   const { GoogleGenerativeAI } = require("@google/generative-ai");
+   module.exports = async (req, res) => {
+     try {
+       const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+       const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+       // ... read fields from req.body ...
+       const result = await model.generateContent("your prompt here");
+       const text = result.response.text();
+       res.json({ /* response fields matching apiContract.responseBody */ });
+     } catch (err) {
+       res.status(500).json({ error: err.message || "Generation failed" });
+     }
+   };
+   The response extraction MUST be: result.response.text() — not result.text, not result.response.candidates, not anything else.
+   The function MUST have a try/catch that returns a JSON error response on failure.
+8. For "text-transformer" and "utility-calculator" types, api/generate.js should do real computation (no AI needed). It MUST still have try/catch with JSON error response.
 9. vercel.json must route /api/* to serverless functions and /* to index.html
 10. package.json needs only the dependencies required by api/generate.js
 11. All HTML must sanitize user input to prevent XSS

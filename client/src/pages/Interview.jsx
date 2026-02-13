@@ -447,7 +447,7 @@ function Interview() {
               const v = parseVerdict(verdicts[agent.id])
               if (!v) return <span className="tab-check">Done</span>
               const isHire = v.rating.toLowerCase().includes('hire') && !v.rating.toLowerCase().includes('no hire')
-              return <span className={`tab-verdict ${isHire ? 'hire' : 'no-hire'}`}>{v.rating} {v.average}</span>
+              return <span className={`tab-verdict ${isHire ? 'hire' : 'no-hire'}`}><span className="tab-verdict-rating">{v.rating} </span>{v.average}</span>
             })()}
           </button>
         ))}

@@ -470,6 +470,10 @@
     padding: 1px 4px;
   }
 
+  .tab-verdict-rating {
+    display: none;
+  }
+
   /* Compact agent header */
   .agent-header {
     padding: 8px 12px;

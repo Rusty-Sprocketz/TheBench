@@ -51,10 +51,10 @@ export async function runTester(spec, files) {
   });
 }
 
-export async function runFixer(spec, files, testResults) {
+export async function runFixer(spec, files, testResults, smokeTestFailure) {
   return fetchJSON(`${API}?action=fixer`, {
     method: 'POST',
-    body: JSON.stringify({ spec, files, testResults }),
+    body: JSON.stringify({ spec, files, testResults, smokeTestFailure }),
   });
 }
 

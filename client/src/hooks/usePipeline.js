@@ -186,34 +186,63 @@ export function usePipeline() {
         updateStage('fixer', { status: 'complete', output: { skipped: true, fixedCount: 0 }, duration: 'skipped' });
       }
 
-      // Stage 5: Deploy
-      const buildLog = {
-        architect: {
-          spec: architectResult.spec,
-          notes: architectResult.spec.architectNotes,
-        },
-        builder: {
-          fileCount: builderResult.fileCount,
-          notes: builderResult.builderNotes,
-          fileNames: Object.keys(builderResult.files),
-        },
-        reviewer: reviewerResult.review,
-        tester: testerResult.tests,
-        fixer: fixerResult ? { fixNotes: fixerResult.fixNotes, fixedCount: fixerResult.fixedCount } : { skipped: true },
-        deployer: {
-          projectName: preflightResult.projectName,
-          deployedAt: new Date().toISOString(),
-          pipelineDuration: `${((performance.now() - pipelineStart) / 1000).toFixed(1)}s`,
-        },
-        meta: {
-          builtBy: 'The Bench — AI Agent Pipeline Demo',
-          url: 'https://the-bench.vercel.app/agentops',
-        },
-      };
+      // Stage 5: Deploy (with smoke test → fixer → redeploy loop)
+      let currentFiles = builderResult.files;
+      let deployAttempts = 0;
+      const maxDeployAttempts = 2; // deploy once, if smoke fails fix + redeploy once
+      let deployResult;
 
-      const deployResult = await runStage('deployer', () =>
-        api.runDeployer(preflightResult.projectName, builderResult.files, architectResult.spec, buildLog)
-      );
+      while (deployAttempts < maxDeployAttempts) {
+        deployAttempts++;
+
+        const buildLog = {
+          architect: {
+            spec: architectResult.spec,
+            notes: architectResult.spec.architectNotes,
+          },
+          builder: {
+            fileCount: builderResult.fileCount,
+            notes: builderResult.builderNotes,
+            fileNames: Object.keys(currentFiles),
+          },
+          reviewer: reviewerResult.review,
+          tester: testerResult.tests,
+          fixer: fixerResult ? { fixNotes: fixerResult.fixNotes, fixedCount: fixerResult.fixedCount } : { skipped: true },
+          deployer: {
+            projectName: preflightResult.projectName,
+            deployedAt: new Date().toISOString(),
+            pipelineDuration: `${((performance.now() - pipelineStart) / 1000).toFixed(1)}s`,
+          },
+          meta: {
+            builtBy: 'The Bench — AI Agent Pipeline Demo',
+            url: 'https://the-bench.vercel.app/agentops',
+          },
+        };
+
+        deployResult = await runStage('deployer', () =>
+          api.runDeployer(preflightResult.projectName, currentFiles, architectResult.spec, buildLog)
+        );
+
+        // Check smoke test — if it failed and we haven't retried yet, run fixer and redeploy
+        if (deployResult.smokeTest?.status === 'fail' && deployAttempts < maxDeployAttempts) {
+          // Run fixer with smoke test failure info
+          fixerResult = await runStage('fixer', () =>
+            api.runFixer(architectResult.spec, currentFiles, null, deployResult.smokeTest)
+          );
+          currentFiles = fixerResult.files;
+          pipelineDataRef.current.files = fixerResult.files;
+          setSourceFiles(fixerResult.files);
+
+          // Clean up the broken deployment before redeploying
+          try { await api.cleanup(preflightResult.projectName); } catch { /* ignore */ }
+
+          // Reset deployer stage for the retry
+          updateStage('deployer', { status: 'pending', output: null, error: null, duration: null });
+          continue;
+        }
+
+        break; // smoke passed or we've exhausted retries
+      }
 
       const total = ((performance.now() - pipelineStart) / 1000).toFixed(1);
       setDeployedUrl(deployResult.url);

@@ -411,16 +411,41 @@ RULES:
 
 async function handleFixer(req, res) {
   if (!process.env.ANTHROPIC_API_KEY) return res.status(500).json({ error: 'Anthropic API key not configured' });
-  const { spec, files, testResults } = req.body;
-  if (!spec || !files || !testResults) return res.status(400).json({ error: 'Missing spec, files, or testResults' });
+  const { spec, files, testResults, smokeTestFailure } = req.body;
+  if (!spec || !files) return res.status(400).json({ error: 'Missing spec or files' });
+  if (!testResults && !smokeTestFailure) return res.status(400).json({ error: 'Missing testResults or smokeTestFailure' });
 
-  const failedTests = testResults.tests.filter(t => t.status === 'fail');
-  if (failedTests.length === 0) return res.json({ stage: 'fixer', files, fixNotes: 'No fixes needed' });
+  let failurePrompt;
+  if (smokeTestFailure) {
+    // Post-deploy smoke test failure — the API endpoint returned an error at runtime
+    failurePrompt = `The app was deployed but the smoke test FAILED. The API endpoint /api/generate returned an error when called at runtime.
+
+SMOKE TEST RESULT:
+- HTTP Status: ${smokeTestFailure.httpStatus || 'unknown'}
+- Response body: ${smokeTestFailure.body || smokeTestFailure.error || 'unknown'}
+
+This means api/generate.js crashes or returns an error at runtime. Common causes:
+- Wrong Gemini API usage (incorrect imports, wrong model ID, wrong response extraction)
+- Missing try/catch in the serverless function
+- Incorrect module.exports format
+- Response not sent via res.json()
+
+Fix api/generate.js so it works at runtime. The correct Gemini pattern is:
+  const { GoogleGenerativeAI } = require("@google/generative-ai");
+  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+  const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+  const result = await model.generateContent("prompt");
+  const text = result.response.text();`;
+  } else {
+    const failedTests = testResults.tests.filter(t => t.status === 'fail');
+    if (failedTests.length === 0) return res.json({ stage: 'fixer', files, fixNotes: 'No fixes needed' });
+    failurePrompt = `FAILING TESTS:\n${failedTests.map((t, i) => `${i + 1}. [${t.category}] ${t.name}: ${t.detail}`).join('\n')}`;
+  }
 
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
   const response = await client.messages.create({
     model: 'claude-sonnet-4-5-20250929', max_tokens: 8192, system: FIXER_SYSTEM,
-    messages: [{ role: 'user', content: `Fix the failing tests in this app.
+    messages: [{ role: 'user', content: `Fix the issues in this app.
 
 ARCHITECT SPEC:
 ${JSON.stringify(spec, null, 2)}
@@ -428,8 +453,7 @@ ${JSON.stringify(spec, null, 2)}
 CURRENT FILES:
 ${Object.entries(files).map(([n, c]) => `--- ${n} ---\n${c}`).join('\n\n')}
 
-FAILING TESTS:
-${failedTests.map((t, i) => `${i + 1}. [${t.category}] ${t.name}: ${t.detail}`).join('\n')}
+${failurePrompt}
 
 Return ONLY the files that need changes, with their complete fixed content.` }],
   });

@@ -46,6 +46,77 @@ async function deleteVercelProject(token, teamId, projectId) {
   if (!r.ok && r.status !== 404) console.error(`Failed to delete ${projectId}: ${r.status}`);
 }
 
+// ─── Deterministic Contract Tests ───
+
+function runContractTests(spec, files) {
+  const tests = [];
+  const appJs = files['app.js'] || '';
+  const apiJs = files['api/generate.js'] || '';
+  const reqFields = Object.keys(spec.apiContract?.requestBody || {});
+  const resFields = Object.keys(spec.apiContract?.responseBody || {});
+
+  // Check fetch URL
+  tests.push({
+    name: 'Fetch URL matches /api/generate',
+    category: 'contract',
+    status: appJs.includes('/api/generate') ? 'pass' : 'fail',
+    detail: appJs.includes('/api/generate')
+      ? 'app.js contains fetch to /api/generate'
+      : 'app.js does NOT contain "/api/generate" — the fetch URL is wrong or missing',
+  });
+
+  // Check each request field appears in app.js (frontend sends correct fields)
+  for (const field of reqFields) {
+    const found = appJs.includes(field);
+    tests.push({
+      name: `Frontend sends request field "${field}"`,
+      category: 'contract',
+      status: found ? 'pass' : 'fail',
+      detail: found
+        ? `app.js references request field "${field}"`
+        : `app.js does NOT contain "${field}" but spec.apiContract.requestBody expects it — frontend sends wrong field name`,
+    });
+  }
+
+  // Check each response field appears in api/generate.js (backend returns correct fields)
+  for (const field of resFields) {
+    const found = apiJs.includes(field);
+    tests.push({
+      name: `Backend returns response field "${field}"`,
+      category: 'contract',
+      status: found ? 'pass' : 'fail',
+      detail: found
+        ? `api/generate.js references response field "${field}"`
+        : `api/generate.js does NOT contain "${field}" but spec.apiContract.responseBody expects it — backend returns wrong field name`,
+    });
+  }
+
+  // Check each response field is read in app.js (frontend reads correct response fields)
+  for (const field of resFields) {
+    const found = appJs.includes(field);
+    tests.push({
+      name: `Frontend reads response field "${field}"`,
+      category: 'contract',
+      status: found ? 'pass' : 'fail',
+      detail: found
+        ? `app.js references response field "${field}"`
+        : `app.js does NOT contain "${field}" but spec.apiContract.responseBody expects it — frontend reads wrong field name from response`,
+    });
+  }
+
+  // Check error handling
+  tests.push({
+    name: 'Frontend checks response.ok before parsing',
+    category: 'contract',
+    status: (appJs.includes('.ok') || appJs.includes('response.ok')) ? 'pass' : 'fail',
+    detail: (appJs.includes('.ok') || appJs.includes('response.ok'))
+      ? 'app.js checks response.ok before parsing JSON'
+      : 'app.js does NOT check response.ok — error responses (HTML) will crash JSON parsing',
+  });
+
+  return tests;
+}
+
 // ─── Actions ───
 
 async function handlePreflight(req, res) {
@@ -378,6 +449,10 @@ Generate your test results JSON.` }] }],
 
   const tests = parseJSON(result.response.text(), 'Tester');
   if (!tests.tests || !Array.isArray(tests.tests)) throw new Error('Tester output missing tests array');
+
+  // Append deterministic contract tests to LLM results
+  const contractTests = runContractTests(spec, files);
+  tests.tests = [...tests.tests, ...contractTests];
   tests.totalTests = tests.tests.length;
   tests.passed = tests.tests.filter(t => t.status === 'pass').length;
   tests.failed = tests.tests.filter(t => t.status === 'fail').length;
@@ -416,25 +491,35 @@ async function handleFixer(req, res) {
 
   let failurePrompt;
   if (smokeTestFailure) {
-    // Post-deploy smoke test failure — the API endpoint returned an error at runtime
-    failurePrompt = `The app was deployed but the smoke test FAILED. The API endpoint /api/generate returned an error when called at runtime.
+    // Post-deploy smoke test failure — build detailed failure context
+    const reason = smokeTestFailure.reason || 'unknown';
+    let failureDetail = `The app was deployed but the smoke test FAILED.\n\nSMOKE TEST RESULT:\n- Failure reason: ${reason}\n- HTTP Status: ${smokeTestFailure.httpStatus || 'unknown'}`;
 
-SMOKE TEST RESULT:
-- HTTP Status: ${smokeTestFailure.httpStatus || 'unknown'}
-- Response body: ${smokeTestFailure.body || smokeTestFailure.error || 'unknown'}
-
-This means api/generate.js crashes or returns an error at runtime. Common causes:
+    if (reason === 'response_validation') {
+      failureDetail += `\n- Missing response fields: ${JSON.stringify(smokeTestFailure.missingFields || [])}`;
+      failureDetail += `\n- Empty response fields: ${JSON.stringify(smokeTestFailure.emptyFields || [])}`;
+      failureDetail += `\n- Actual fields in response: ${JSON.stringify(smokeTestFailure.actualFields || [])}`;
+      failureDetail += `\n- Response body: ${smokeTestFailure.body || 'unknown'}`;
+      failureDetail += `\n\nThe API returned 200 but the response fields don't match the spec. Fix api/generate.js to return the exact field names from spec.apiContract.responseBody: ${JSON.stringify(Object.keys(spec.apiContract?.responseBody || {}))}`;
+    } else if (reason === 'page_load') {
+      failureDetail += `\n\nThe HTML page at / failed to load. Check index.html is valid.`;
+    } else {
+      failureDetail += `\n- Response body: ${smokeTestFailure.body || smokeTestFailure.error || 'unknown'}`;
+      failureDetail += `\n\nThis means api/generate.js crashes or returns an error at runtime. Common causes:
 - Wrong Gemini API usage (incorrect imports, wrong model ID, wrong response extraction)
 - Missing try/catch in the serverless function
 - Incorrect module.exports format
-- Response not sent via res.json()
+- Response not sent via res.json()`;
+    }
 
-Fix api/generate.js so it works at runtime. The correct Gemini pattern is:
+    failureDetail += `\n\nThe correct Gemini pattern is:
   const { GoogleGenerativeAI } = require("@google/generative-ai");
   const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
   const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
   const result = await model.generateContent("prompt");
   const text = result.response.text();`;
+
+    failurePrompt = failureDetail;
   } else {
     const failedTests = testResults.tests.filter(t => t.status === 'fail');
     if (failedTests.length === 0) return res.json({ stage: 'fixer', files, fixNotes: 'No fixes needed' });
@@ -572,12 +657,36 @@ async function handleDeployer(req, res) {
           try { smokeJson = JSON.parse(smokeBody); } catch { smokeJson = null; }
 
           if (smokeRes.ok && smokeJson) {
-            smokeTest = { status: 'pass', httpStatus: smokeRes.status, response: smokeJson };
+            // Verify expected response fields exist and are non-empty
+            const expectedFields = Object.keys(spec.apiContract?.responseBody || {});
+            const missingFields = expectedFields.filter(f => !(f in smokeJson));
+            const emptyFields = expectedFields.filter(f =>
+              f in smokeJson && (smokeJson[f] === null || smokeJson[f] === '')
+            );
+
+            if (missingFields.length > 0 || emptyFields.length > 0) {
+              smokeTest = {
+                status: 'fail', reason: 'response_validation',
+                httpStatus: smokeRes.status, missingFields, emptyFields,
+                actualFields: Object.keys(smokeJson),
+                body: smokeBody.slice(0, 500),
+              };
+            } else {
+              smokeTest = { status: 'pass', httpStatus: smokeRes.status, response: smokeJson };
+            }
           } else {
-            smokeTest = { status: 'fail', httpStatus: smokeRes.status, body: smokeBody.slice(0, 500) };
+            smokeTest = { status: 'fail', reason: 'http_error', httpStatus: smokeRes.status, body: smokeBody.slice(0, 500) };
+          }
+
+          // Also verify the HTML page loads
+          if (smokeTest.status === 'pass') {
+            const pageRes = await fetch(finalUrl);
+            if (!pageRes.ok) {
+              smokeTest = { status: 'fail', reason: 'page_load', httpStatus: pageRes.status };
+            }
           }
         } catch (err) {
-          smokeTest = { status: 'fail', error: err.message };
+          smokeTest = { status: 'fail', reason: 'network_error', error: err.message };
         }
       }
 

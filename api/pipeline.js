@@ -13,7 +13,7 @@ const RATE_LIMIT_MS = 2 * 60 * 1000; // 2 minutes (reduced for testing)
 const MAX_AGE_MS = 30 * 60 * 1000; // 30 minutes
 
 const rateLimitStore = {};
-let variantIndex = 0; // Sequential cycling through all variants for testing
+let variantIndex = 2; // Start at ELI5 (skip Haiku=0, Emoji=1 — already tested)
 
 // ─── Helpers ───
 

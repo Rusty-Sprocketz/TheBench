@@ -87,6 +87,7 @@
   font-size: 13px;
   color: var(--text-secondary);
   font-weight: 500;
+  flex-shrink: 0;
 }
 
 .demo-banner-btn {
@@ -98,7 +99,7 @@
 .interview {
   display: flex;
   flex-direction: column;
-  min-height: calc(100vh - 64px);
+  height: calc(100vh - 64px);
   padding: 16px 0;
 }
 
@@ -111,6 +112,7 @@
   background: var(--bg-secondary);
   border-radius: 12px;
   border: 1px solid var(--border);
+  flex-shrink: 0;
 }
 
 .agent-tab {
@@ -188,6 +190,7 @@
   border: 1px solid var(--border);
   border-radius: 12px;
   margin-bottom: 12px;
+  flex-shrink: 0;
 }
 
 .agent-dot {
@@ -222,7 +225,7 @@
 /* Chat area */
 .chat-area {
   flex: 1;
-  min-height: 300px;
+  min-height: 0;
   overflow-y: auto;
   padding: 16px 4px;
 }
@@ -305,6 +308,9 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
+  flex-shrink: 0;
+  overflow-y: auto;
+  max-height: 45vh;
 }
 
 .summary-overall {

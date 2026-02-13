@@ -195,6 +195,33 @@ function Interview() {
 
   const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms))
 
+  const typeMessage = (agentId, content, charsPerTick = 3, tickMs = 15) => {
+    return new Promise((resolve) => {
+      // Add message with empty content
+      setConversations(prev => ({
+        ...prev,
+        [agentId]: [...prev[agentId], { role: 'assistant', content: '' }],
+      }))
+
+      let charIndex = 0
+      const tick = () => {
+        if (demoAbortRef.current) { resolve(); return }
+        charIndex = Math.min(charIndex + charsPerTick, content.length)
+        setConversations(prev => {
+          const msgs = [...prev[agentId]]
+          msgs[msgs.length - 1] = { role: 'assistant', content: content.slice(0, charIndex) }
+          return { ...prev, [agentId]: msgs }
+        })
+        if (charIndex < content.length) {
+          setTimeout(tick, tickMs)
+        } else {
+          resolve()
+        }
+      }
+      tick()
+    })
+  }
+
   const startDemoMode = async () => {
     demoAbortRef.current = false
     setDemoMode(true)
@@ -212,44 +239,41 @@ function Interview() {
 
       setCurrentAgentIndex(agentIdx)
 
-      // Reveal messages in pairs (user + assistant)
       for (let i = 0; i < demoMessages.length; i++) {
         if (demoAbortRef.current) return
         const msg = demoMessages[i]
 
         if (msg.role === 'user') {
-          // Show user message
+          // User messages appear instantly
           setConversations(prev => ({
             ...prev,
             [agentId]: [...prev[agentId], msg],
           }))
-          await sleep(300)
+          await sleep(400)
         } else if (msg.role === 'assistant') {
           // Show typing indicator
           setLoading(true)
-          await sleep(600)
+          await sleep(800)
           if (demoAbortRef.current) { setLoading(false); return }
-
-          // Show assistant message
-          setConversations(prev => ({
-            ...prev,
-            [agentId]: [...prev[agentId], msg],
-          }))
           setLoading(false)
+
+          // Typewrite the assistant message
+          await typeMessage(agentId, msg.content)
+          if (demoAbortRef.current) return
 
           // Check if this is a verdict message
           if (msg.content.includes('[VERDICT]')) {
             setVerdicts(prev => ({ ...prev, [agentId]: msg.content }))
-            await sleep(800)
+            await sleep(1000)
           } else {
-            await sleep(400)
+            await sleep(500)
           }
         }
       }
 
       // Pause between agents
       if (agentIdx < agentIds.length - 1) {
-        await sleep(600)
+        await sleep(800)
       }
     }
 

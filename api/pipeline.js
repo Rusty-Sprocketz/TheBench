@@ -181,7 +181,7 @@ CRITICAL RULES:
 1. index.html must be a complete standalone HTML file that links to styles.css and app.js
 2. index.html MUST include a "How I Was Built" panel section at the bottom with id="build-log-panel"
 3. The build log panel should have a toggle button and show placeholder divs with ids: architect-log, builder-log, reviewer-log, tester-log, deployer-log
-4. app.js must load build-log.json and populate those divs (the deploy step will create this file)
+4. app.js must read build log data from window.__BUILD_LOG__ (a global set by an inline script injected at deploy time). Do NOT fetch build-log.json. Use: const buildLog = window.__BUILD_LOG__ || {}; Then populate the panel divs from buildLog.architect, buildLog.builder, buildLog.reviewer, buildLog.tester, buildLog.deployer.
 5. styles.css must implement the Architect's theme (colors, fonts, layout)
 6. api/generate.js must be a valid Vercel serverless function (module.exports = async (req, res) => { ... })
 7. For "ai-micro-tool" type apps, api/generate.js should use the Gemini API via @google/generative-ai
@@ -191,7 +191,8 @@ CRITICAL RULES:
 11. All HTML must sanitize user input to prevent XSS
 12. The app must be fully functional and visually polished
 13. Use the EXACT color palette from the spec for CSS custom properties
-14. Include a footer link: "Built by AI agents on <a href='https://the-bench.vercel.app/agentops'>The Bench</a>"`;
+14. Include a footer link: "Built by AI agents on <a href='https://the-bench.vercel.app/agentops'>The Bench</a>"
+15. The main app feature MUST work. The fetch call in app.js must use the correct URL ("/api/generate"), send the right field names matching apiContract.requestBody, and read the correct field names from the response matching apiContract.responseBody. Double-check these match exactly.`;
 
 async function handleBuilder(req, res) {
   if (!process.env.ANTHROPIC_API_KEY) return res.status(500).json({ error: 'Anthropic API key not configured' });
@@ -213,8 +214,9 @@ Remember:
 - package.json must include "@google/generative-ai" as dependency` : `
 - api/generate.js does pure computation (no external API needed)
 - package.json can be minimal with no dependencies`}
-- Include the "How I Was Built" panel with build-log.json loading
-- Make it look professional and polished` }],
+- The "How I Was Built" panel reads from window.__BUILD_LOG__ (NOT a fetch to build-log.json)
+- Make it look professional and polished
+- CRITICAL: Make sure the fetch URL in app.js is exactly "/api/generate" and the request/response field names match the spec's apiContract exactly` }],
   });
 
   const result = parseJSON(response.content[0].text, 'Builder');
@@ -308,29 +310,28 @@ The JSON must follow this exact schema:
 
 CRITICAL: You must CAREFULLY trace through the code logic to find real bugs. Common issues to catch:
 
-LOGIC TESTS (most important):
-1. Does app.js correctly call the API endpoint? Check the fetch URL matches what api/generate.js expects
-2. Does app.js correctly parse the API response? Check that response field names in the frontend match what the backend actually returns
-3. Does api/generate.js return valid JSON with the correct field names matching the spec's responseBody?
-4. Does app.js correctly display the result? Trace from API response → DOM update. Check for mismatched property names
-5. For AI-powered apps: Does api/generate.js correctly initialize and call the Gemini API? Check model name, API key usage, prompt construction, and response extraction
-6. For computation apps: Does the computation logic actually work? Trace through the algorithm with a sample input
-7. Does error handling in both frontend and backend work? Will caught errors display properly?
-8. Are there any syntax errors in the JS code? Check for unclosed brackets, missing semicolons in critical spots, typos in variable names
+LOGIC TESTS (most important — trace through the code carefully):
+1. Does app.js call fetch("/api/generate", ...) with the EXACT field names from the spec's apiContract.requestBody? List the field names in the fetch body and compare to the spec. FAIL if they don't match.
+2. Does app.js read the EXACT field names from the API response matching the spec's apiContract.responseBody? List what the frontend reads vs what the backend returns. FAIL if they don't match.
+3. Does api/generate.js return res.json({...}) with field names matching apiContract.responseBody? FAIL if it returns different field names.
+4. For AI-powered apps: Does api/generate.js correctly use: const { GoogleGenerativeAI } = require("@google/generative-ai"); new GoogleGenerativeAI(process.env.GEMINI_API_KEY); model.generateContent(...)? Check the response is extracted correctly (result.response.text()). FAIL on any mistake.
+5. For computation apps: Trace through the algorithm with the sample input "hello world". Does it produce a reasonable result? FAIL if the logic has a bug.
+6. Does error handling work? If the API call fails, does app.js show an error message instead of crashing? Does api/generate.js have try/catch and return error JSON?
+7. Does app.js read build log from window.__BUILD_LOG__ (NOT fetch build-log.json)? FAIL if it tries to fetch a file.
 
 STRUCTURAL TESTS:
-9. Required DOM elements: input field, submit button, output area, build-log-panel
-10. CSS custom properties defined matching the spec palette
+8. Required DOM elements: input field, submit button, output area, build-log-panel
+9. CSS custom properties defined matching the spec palette
 
 API TESTS:
-11. Serverless function exports correctly (module.exports = async (req, res) => {...})
-12. Function handles the correct HTTP method
-13. Function returns JSON via res.json() or res.status().json()
+10. Serverless function exports correctly (module.exports = async (req, res) => {...})
+11. Function checks req.method and handles POST
+12. Function returns JSON via res.json()
 
 ROUTING:
-14. vercel.json has correct rewrites for API and SPA
+13. vercel.json has correct rewrites for API and SPA fallback
 
-For each FAIL, describe the exact bug: which file, which line/section, what's wrong, and what it should be instead. Be specific enough that a developer could fix it from your description alone.`;
+For each FAIL, describe the exact bug: which file, which section, what's wrong, and what it should be instead. Be specific enough that a developer could fix it from your description alone.`;
 
 async function handleTester(req, res) {
   if (!process.env.GEMINI_API_KEY) return res.status(500).json({ error: 'Gemini API key not configured' });
@@ -379,7 +380,9 @@ RULES:
 2. When you include a file, include the COMPLETE file content (not a diff).
 3. Fix every failing test the Tester identified. Read their detailed descriptions carefully.
 4. Do NOT change the overall app design, theme, or structure — only fix the bugs.
-5. Pay special attention to: mismatched API field names, incorrect fetch URLs, broken JSON parsing, incorrect Gemini API usage.`;
+5. Pay special attention to: mismatched API field names, incorrect fetch URLs, broken JSON parsing, incorrect Gemini API usage.
+6. Build log data comes from window.__BUILD_LOG__ (injected at deploy time). Do NOT fetch build-log.json.
+7. The fetch URL for the app's main action MUST be "/api/generate" and field names MUST match the spec's apiContract exactly.`;
 
 async function handleFixer(req, res) {
   if (!process.env.ANTHROPIC_API_KEY) return res.status(500).json({ error: 'Anthropic API key not configured' });
@@ -425,7 +428,16 @@ async function handleDeployer(req, res) {
   const { projectName, files, spec, buildLog } = req.body;
   if (!projectName || !files) return res.status(400).json({ error: 'Missing projectName or files' });
 
-  const allFiles = { ...files, 'build-log.json': JSON.stringify(buildLog || {}, null, 2) };
+  // Inject build log as inline script into index.html (avoids routing issues with separate JSON file)
+  const buildLogScript = `<script>window.__BUILD_LOG__=${JSON.stringify(buildLog || {})};</script>`;
+  const html = files['index.html'] || '';
+  const injectedHtml = html.includes('</head>')
+    ? html.replace('</head>', `${buildLogScript}</head>`)
+    : html.includes('</body>')
+      ? html.replace('</body>', `${buildLogScript}</body>`)
+      : html + buildLogScript;
+
+  const allFiles = { ...files, 'index.html': injectedHtml };
 
   // Step 1: Create project
   const projRes = await fetch(`${VERCEL_API}/v9/projects?teamId=${teamId}`, {
@@ -484,7 +496,44 @@ async function handleDeployer(req, res) {
       });
 
       const finalUrl = `https://${aliasUrl}`;
-      return res.json({ stage: 'deployer', url: finalUrl, projectId: project.id, deploymentId: deployment.id, projectName, createdAt: Date.now() });
+
+      // Step 7: Smoke test — hit the app's API to verify the action button works
+      let smokeTest = { status: 'skipped' };
+      if (spec?.apiContract) {
+        try {
+          // Build a test payload from the spec's requestBody
+          const testPayload = {};
+          const reqBody = spec.apiContract.requestBody || {};
+          for (const [key, type] of Object.entries(reqBody)) {
+            if (type === 'string' || type.includes('string')) testPayload[key] = 'hello world test';
+            else if (type === 'number' || type.includes('number')) testPayload[key] = 42;
+            else testPayload[key] = 'test';
+          }
+
+          // Wait a moment for the alias to propagate
+          await new Promise(r => setTimeout(r, 3000));
+
+          const smokeRes = await fetch(`${finalUrl}/api/generate`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(testPayload),
+          });
+
+          const smokeBody = await smokeRes.text();
+          let smokeJson;
+          try { smokeJson = JSON.parse(smokeBody); } catch { smokeJson = null; }
+
+          if (smokeRes.ok && smokeJson) {
+            smokeTest = { status: 'pass', httpStatus: smokeRes.status, response: smokeJson };
+          } else {
+            smokeTest = { status: 'fail', httpStatus: smokeRes.status, body: smokeBody.slice(0, 500) };
+          }
+        } catch (err) {
+          smokeTest = { status: 'fail', error: err.message };
+        }
+      }
+
+      return res.json({ stage: 'deployer', url: finalUrl, projectId: project.id, deploymentId: deployment.id, projectName, createdAt: Date.now(), smokeTest });
     }
     if (state === 'ERROR' || state === 'CANCELED') throw new Error(`Deployment ${state}: ${d.errorMessage || 'unknown'}`);
     await new Promise(r => setTimeout(r, 2000));

@@ -48,8 +48,12 @@ function getStageSummary(name, stage) {
       case 'fixer':
         if (stage.output.skipped) return 'All tests passed — no fixes needed';
         return `Fixed ${stage.output.fixedCount || '?'} files`;
-      case 'deployer':
+      case 'deployer': {
+        const smoke = stage.output.smokeTest;
+        if (smoke?.status === 'pass') return 'Live! Smoke test passed.';
+        if (smoke?.status === 'fail') return 'Live, but smoke test failed — app API may not work.';
         return 'Live!';
+      }
       default:
         return 'Done';
     }

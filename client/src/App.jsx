@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router-dom'
+import { Routes, Route, useLocation } from 'react-router-dom'
 import Nav from './components/Nav'
 import Landing from './pages/Landing'
 import Interview from './pages/Interview'
@@ -7,6 +7,9 @@ import AgentOps from './pages/AgentOps'
 import './App.css'
 
 function App() {
+  const location = useLocation()
+  const isInterview = location.pathname === '/interview'
+
   return (
     <>
       <Nav />
@@ -18,9 +21,11 @@ function App() {
           <Route path="/how-it-works" element={<HowItWorks />} />
         </Routes>
       </main>
-      <footer className="site-footer">
-        <span>The Bench v2.7.4</span>
-      </footer>
+      {!isInterview && (
+        <footer className="site-footer">
+          <span>The Bench v2.7.5</span>
+        </footer>
+      )}
     </>
   )
 }

@@ -8,9 +8,9 @@ const { GoogleGenerativeAI } = require('@google/generative-ai');
 
 const VERCEL_API = 'https://api.vercel.com';
 const PROJECT_PREFIX = 'bench-demo-';
-const MAX_ACTIVE_PROJECTS = 3;
+const MAX_ACTIVE_PROJECTS = 6;
 const RATE_LIMIT_MS = 2 * 60 * 1000; // 2 minutes (reduced for testing)
-const MAX_AGE_MS = 60 * 60 * 1000; // 1 hour
+const MAX_AGE_MS = 30 * 60 * 1000; // 30 minutes
 
 const rateLimitStore = {};
 let variantIndex = 0; // Sequential cycling through all variants for testing

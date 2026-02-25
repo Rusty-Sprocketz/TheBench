@@ -2,6 +2,7 @@ import { useState, useCallback, useRef, useEffect } from 'react';
 import * as api from '../utils/pipelineApi';
 
 const STAGES = ['preflight', 'architect', 'builder', 'reviewer', 'tester', 'fixer', 'deployer'];
+const MAX_AGE_MS = 30 * 60 * 1000; // 30 minutes — must match server-side MAX_AGE_MS
 
 const STAGE_LABELS = {
   preflight: 'Preflight',
@@ -89,6 +90,19 @@ export function usePipeline() {
       });
     }
   }, [pipelineStatus, stages, projectName, targetUrl, deployedUrl, deployedAt, projectId, totalDuration, sourceFiles]);
+
+  // Auto-cleanup: delete the Vercel project when the 30-minute window expires.
+  // Works for fresh deployments and restored localStorage sessions (deployedAt may already be partially elapsed).
+  useEffect(() => {
+    if (pipelineStatus !== 'deployed' || !deployedAt) return;
+    const remaining = MAX_AGE_MS - (Date.now() - deployedAt);
+    if (remaining <= 0) {
+      cleanupDeployment();
+      return;
+    }
+    const timer = setTimeout(cleanupDeployment, remaining);
+    return () => clearTimeout(timer);
+  }, [pipelineStatus, deployedAt, cleanupDeployment]);
 
   const updateStage = useCallback((name, updates) => {
     setStages(prev => ({

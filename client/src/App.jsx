@@ -23,7 +23,7 @@ function App() {
       </main>
       {!isInterview && (
         <footer className="site-footer">
-          <span>The Bench v2.9.2</span>
+          <span>The Bench v2.9.3</span>
         </footer>
       )}
     </>
